@@ -56,7 +56,7 @@
         },
         "virtualMachineName": {
             "type": "string",
-            "defaultValue": "flkelly-neu-id-ad-vm1",
+            "defaultValue": "ad-vm1",
             "metadata": {
                 "description": "Virtual machine name."
             }
