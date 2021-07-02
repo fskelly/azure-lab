@@ -82,7 +82,7 @@
                 "description": "Subnet IP range."
             }
         },
-        "prefix": {
+        "resourcePrefix": {
             "type": "string", 
              "metadata": {
                 "description": "prefix for resources."
@@ -96,14 +96,14 @@
         }
     },
     "variables": {
-        "loadBalancerName": "[concat(parameters('prefix'), '-',parameters('regionShortCode'), '-id-lb1')]",
-        "availabilitySetName": "[concat(parameters('prefix'), '-',parameters('regionShortCode'), '-id-ad-as1')]",
-        "publicIPAddressName": "[concat(parameters('prefix'), '-',parameters('regionShortCode'), '-id-ad-pip1')]",
-        "networkInterfaceName": "[concat(parameters('prefix'), '-',parameters('regionShortCode'), '-id-ad-nic1')]",
-        "inboundNatRulesName": "[concat(parameters('prefix'), '-',parameters('regionShortCode'), '-id-lb-nat-rdp')]",
-        "backendAddressPoolName": "[concat(parameters('prefix'), '-',parameters('regionShortCode'), '-id-lb-be1')]",
-        "loadBalancerFrontEndIPName": "[concat(parameters('prefix'), '-',parameters('regionShortCode'), '-id-lb-fe1')]",
-        "virtualNetworkName": "[concat(parameters('prefix'), '-',parameters('regionShortCode'), '-id-ss-vnet')]",
+        "loadBalancerName": "[concat(parameters('resourcePrefix'), '-',parameters('regionShortCode'), '-id-lb1')]",
+        "availabilitySetName": "[concat(parameters('resourcePrefix'), '-',parameters('regionShortCode'), '-id-ad-as1')]",
+        "publicIPAddressName": "[concat(parameters('resourcePrefix'), '-',parameters('regionShortCode'), '-id-ad-pip1')]",
+        "networkInterfaceName": "[concat(parameters('resourcePrefix'), '-',parameters('regionShortCode'), '-id-ad-nic1')]",
+        "inboundNatRulesName": "[concat(parameters('resourcePrefix'), '-',parameters('regionShortCode'), '-id-lb-nat-rdp')]",
+        "backendAddressPoolName": "[concat(parameters('resourcePrefix'), '-',parameters('regionShortCode'), '-id-lb-be1')]",
+        "loadBalancerFrontEndIPName": "[concat(parameters('resourcePrefix'), '-',parameters('regionShortCode'), '-id-lb-fe1')]",
+        "virtualNetworkName": "[concat(parameters('resourcePrefix'), '-',parameters('regionShortCode'), '-id-ss-vnet')]",
         "virtualMachineName": "[concat(parameters('regionShortCode'), '-advm1')]"
     },
     "resources": [
