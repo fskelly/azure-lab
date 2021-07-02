@@ -1,8 +1,7 @@
 ##Populate as needed for housing AD components
 $rgLocation = read-host "Which Location?"
 $rgName = read-host "Please provide RG Name"
-$fileURI = read-host "Please provide the url for the JSON file"
-$paramatersURI = read-host "Please provide the url for the parameters file"
+$fileURI = "https://raw.githubusercontent.com/fskelly/azure-lab/main/activeDirectory/templates/domiancontrollerAzureDeploy1.json"
 
 ## add tags if you want to add metadata
 $tags = @{"Purpose"="Identity"; "Can Be Deleted"="no"}
