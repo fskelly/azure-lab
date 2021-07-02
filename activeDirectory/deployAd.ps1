@@ -11,7 +11,5 @@ $tags = @{"Purpose"="Identity"; "Can Be Deleted"="no"}
 $rg = New-AzResourceGroup -Name $rgName -Location $rgLocation 
 New-AzTag -ResourceId $rg.ResourceId -Tag $tags
 
-New-AzResourceGroup -Name $rgName -Location $rgLocation #use this command when you need to create a new resource group for your deployment
-
 ##if you want to use a parameter file
 New-AzResourceGroupDeployment -ResourceGroupName $rgName -TemplateUri $fileURI -TemplateParameterUri $paramatersURI
