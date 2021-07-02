@@ -104,7 +104,7 @@
         "backendAddressPoolName": "[concat(parameters('prefix'), '-',parameters('regionShortCode'), '-id-lb-be1')]",
         "loadBalancerFrontEndIPName": "[concat(parameters('prefix'), '-',parameters('regionShortCode'), '-id-lb-fe1')]",
         "virtualNetworkName": "[concat(parameters('prefix'), '-',parameters('regionShortCode'), '-id-ss-vnet')]",
-        "virtualMachineName": "[concat(parameters('prefix'), '-',parameters('regionShortCode'), '-advm1')]"
+        "virtualMachineName": "[concat(parameters('regionShortCode'), '-advm1')]"
     },
     "resources": [
         {
