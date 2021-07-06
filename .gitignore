@@ -1,6 +1,7 @@
 /log/*
 /testingarea/*
 /.vscode/*
+**/.vscode
 /.history/*
 .history
 .vscode
