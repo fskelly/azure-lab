@@ -72,3 +72,5 @@ module lng 'modules/lng.bicep' = {
     vng
   ]
 }
+
+output connectivityHubVNetName string = '${prefix}-${regionShortCode}-con-vnet'
