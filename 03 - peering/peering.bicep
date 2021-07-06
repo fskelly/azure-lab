@@ -40,3 +40,5 @@ module spoke2HubPeering 'modules/spokePeering.bicep' = {
 }
 
 
+output spokeVnetID string = spokeVnet.outputs.spokeVnetId
+output connectivityHubVnetID string = hubVnet.outputs.connectivityHubVnetID
