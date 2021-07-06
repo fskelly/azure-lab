@@ -21,3 +21,5 @@ resource localNetworkGateway 'Microsoft.Network/localNetworkGateways@2019-11-01'
     gatewayIpAddress: gateway
   }
 }
+
+output lngID string = localNetworkGateway.id
