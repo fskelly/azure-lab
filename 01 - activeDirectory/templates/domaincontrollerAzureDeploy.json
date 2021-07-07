@@ -364,5 +364,11 @@
                 }
             }
         }
-    ]
+    ],
+    "outputs": {
+        "virtualNetworkName": {
+            "type": "string",
+            "value": "[concat(parameters('resourcePrefix'), '-',parameters('regionShortCode'), '-id-ss-vnet')]"
+        }
+    }
 }
