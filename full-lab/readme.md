@@ -33,28 +33,28 @@ New-AzTag -ResourceId $rg.ResourceId -Tag $tags
 New-AzResourceGroupDeployment -ResourceGroupName $rgName -TemplateUri $fileURI
 ```
 
-## [Point to site components](testingarea\fullLab\02-restOfLab\p2sModules)
+## [Point to site components](full-lab\02-restOfLab\p2sModules)
 
 This is the start of the native bicep components. This deploys all the requirements for Point-to-Site connectivity to be established. There is still some additional work you would need to do based upon the type of VPN connection you want to use. I, personally, use OpenVPN and these [instructions](https://www.getanadmin.com/azure/azure-point-to-site-vpn-setup-step-by-step/#:~:text=Azure%20Point%20to%20Site%20VPN%20Setup%20On%20the,case%2C%20the%20newly%20created%20Virtual%20Net%20Vnet3%20selected.), specifically for the certificate commands.
 
 Components
 
-- [Virtual Network](testingarea\fullLab\02-restOfLab\p2sModules\network.bicep)
-- [Public Ip](testingarea\fullLab\02-restOfLab\p2sModules\pip.bicep)
-- [Virtual Network Gateway](testingarea\fullLab\02-restOfLab\p2sModules\vng.bicep)
+- [Virtual Network](full-lab\02-restOfLab\p2sModules\network.bicep)
+- [Public Ip](full-lab\02-restOfLab\p2sModules\pip.bicep)
+- [Virtual Network Gateway](full-lab\02-restOfLab\p2sModules\vng.bicep)
 
 **Remember a Virtual Network Gateway will take some time to provision.**
 
-## [Site to site components](testingarea\fullLab\02-restOfLab\s2sModules)
+## [Site to site components](full-lab\02-restOfLab\s2sModules)
 
 This extends the functionality of the Virtual Network gateway to allow site-to-site connections. You will need to be able to provide a gatewayIP, this is your router's / firewall's public ip address. Depending on your device, the steps for completing the VPN connection will be different. You will also need to provide your local ip range.
 
 Components
 
-- [Connection](testingarea\fullLab\02-restOfLab\s2sModules\connection.bicep)
-- [Local Network Gateway](testingarea\fullLab\02-restOfLab\s2sModules\lng.bicep)
+- [Connection](full-lab\02-restOfLab\s2sModules\connection.bicep)
+- [Local Network Gateway](full-lab\02-restOfLab\s2sModules\lng.bicep)
 
-## [Vnet Peering](testingarea\fullLab\02-restOfLab\peeringModules)
+## [Vnet Peering](full-lab\02-restOfLab\peeringModules)
 
 Connectivity Vnet - Virtual network connected to Virtual Network Gateway and Local Network Gateway.
 
@@ -64,7 +64,7 @@ Another extension that connects these two vnets together.
 
 Components
 
-- [Identity Vnet](testingarea\fullLab\02-restOfLab\peeringModules\identityVnet.bicep)
-- [Connectivity Vnet](testingarea\fullLab\02-restOfLab\peeringModules\connectivityVnet.bicep)
-- [Peering from Connectivity to Identity](testingarea\fullLab\02-restOfLab\peeringModules\connectivity2idenityPeering.bicep)
-- [Peering from Identity to Connectivity](testingarea\fullLab\02-restOfLab\peeringModules\identity2connectivityPeering.bicep)
+- [Identity Vnet](full-lab\02-restOfLab\peeringModules\identityVnet.bicep)
+- [Connectivity Vnet](full-lab\02-restOfLab\peeringModules\connectivityVnet.bicep)
+- [Peering from Connectivity to Identity](full-lab\02-restOfLab\peeringModules\connectivity2idenityPeering.bicep)
+- [Peering from Identity to Connectivity](full-lab\02-restOfLab\peeringModules\identity2connectivityPeering.bicep)
