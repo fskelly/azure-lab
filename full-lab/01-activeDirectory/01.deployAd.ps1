@@ -11,6 +11,3 @@ $rg = New-AzResourceGroup -Name $rgName -Location $rgLocation
 New-AzTag -ResourceId $rg.ResourceId -Tag $tags
 
 New-AzResourceGroupDeployment -ResourceGroupName $rgName -TemplateUri $fileURI
-
-##if you want to use a parameter file
-#New-AzResourceGroupDeployment -ResourceGroupName $rgName -TemplateUri $fileURI -TemplateParameterUri $paramatersURI
