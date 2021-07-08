@@ -54,7 +54,7 @@ Components
 - [Connection](full-lab\02-restOfLab\s2sModules\connection.bicep)
 - [Local Network Gateway](full-lab\02-restOfLab\s2sModules\lng.bicep)
 
-## [Vnet Peering](full-lab\02-restOfLab\peeringModules)
+## [Vnet Peering](./02-restOfLab/peeringModules/)
 
 Connectivity Vnet - Virtual network connected to Virtual Network Gateway and Local Network Gateway.
 
