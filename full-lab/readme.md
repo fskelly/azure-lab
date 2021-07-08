@@ -64,7 +64,7 @@ Another extension that connects these two vnets together.
 
 Components
 
-- [Identity Vnet](full-lab\02-restOfLab\peeringModules\identityVnet.bicep)
-- [Connectivity Vnet](full-lab\02-restOfLab\peeringModules\connectivityVnet.bicep)
-- [Peering from Connectivity to Identity](full-lab\02-restOfLab\peeringModules\connectivity2idenityPeering.bicep)
-- [Peering from Identity to Connectivity](full-lab\02-restOfLab\peeringModules\identity2connectivityPeering.bicep)
+- [Identity Vnet](./02-restOfLab/peeringModules/identityVnet.bicep)
+- [Connectivity Vnet](./02-restOfLab/peeringModules/connectivityVnet.bicep)
+- [Peering from Connectivity to Identity](./02-restOfLab/peeringModules/connectivity2idenityPeering.bicep)
+- [Peering from Identity to Connectivity](./02-restOfLab/peeringModules/identity2connectivityPeering.bicep)
