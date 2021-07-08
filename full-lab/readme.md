@@ -15,7 +15,7 @@ What is currently deployed with the lab?
 All deployed with a PowerShell command and the use of a JSON template. I am in the process of trying to convert this to [Bicep](https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/bicep-overview) to make this a more complete experience. Examples of [Bicep](https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/bicep-overview) files can be found [here](https://github.com/Azure/bicep/tree/main/docs/examples).  
 Simply run this [file](testingarea\fullLab\01-activeDirectory\01.deployAd.ps1) and provide the rquired parameters.  
 
-PowerShell code
+PowerShell
 
 ```powershell
 ##Populate as needed for housing AD components
