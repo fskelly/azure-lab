@@ -1,6 +1,6 @@
 ## location to be deployed into
 $rgLocation = "northeurope"
-$rgName = "flkelly-neu-identity-test"
+$rgName = "flkelly-neu-identity-test-00111"
 
 ## add tags if you want to add metadata
 $tags = @{"Purpose"="Identity"; "Can Be Deleted"="no"}

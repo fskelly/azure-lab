@@ -50,6 +50,12 @@ var zones = [for i in range(0, count): contains(azRegions, location) ? [
   string(i == 0 || i == 3 || i == 6 ? 1 : i == 1 || i == 4 || i == 7 ? 2 : 3)
 ] : []]
 
+
+param bastionSubnetIpPrefix string = '10.0.0.128/27'
+param bastionHostName string
+var bastionSubnetName = 'AzureBastionSubnet'
+var publicIpAddressName = '${bastionHostName}-pip'
+
 var domainUserName = newForest == true ? '${split(domainFqdn,'.')[0]}\\${localAdminUsername}' : domainAdminUsername
 var domainPassword = newForest == true ? localAdminPassword : domainAdminPassword
 var domainSite = newForest == true ? 'Default-First-Site-Name' : site
@@ -66,6 +72,8 @@ module vnet './adModules/vnet.bicep' = {
     vnetName: vnetName
     addressSpacePrefix: addressSpacePrefix
     vnetPrefix: vnetPrefix
+    bastionSubnetName: bastionSubnetName
+    bastionSubnetIpPrefix: bastionSubnetIpPrefix
   }
 }
 
@@ -94,6 +102,40 @@ module avSet './adModules/avset.bicep' = {//}= if (zones == []) {
   }
   
 } */
+
+resource publicIp 'Microsoft.Network/publicIpAddresses@2020-05-01' = {
+  name: publicIpAddressName
+  location: location
+  sku: {
+    name: 'Standard'
+  }
+  properties: {
+    publicIPAllocationMethod: 'Static'
+  }
+}
+
+resource bastionHost 'Microsoft.Network/bastionHosts@2020-05-01' = {
+  name: bastionHostName
+  location: location
+  properties: {
+    ipConfigurations: [
+      {
+        name: 'IpConf'
+        properties: {
+          subnet: {
+            id: vnet.outputs.bastionSubnetID
+          }
+          publicIPAddress: {
+            id: publicIp.id
+          }
+        }
+      }
+    ]
+  }
+  dependsOn: [
+    vnet
+  ]
+}
 
 resource nics 'Microsoft.Network/networkInterfaces@2020-11-01' = [for i in range(0, count): {
   name: '${vmNamePrefix}-${i + 1}-nic'
