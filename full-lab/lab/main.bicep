@@ -25,7 +25,7 @@ param localAdminUsername string = 'azure_ad_groot'
 param localAdminPassword string
 param timeZoneId string = 'Eastern Standard Time'
 
-param dscConfigScript string = 'https://github.com/fskelly/azure-lab/blob/main/full-lab/lab/adModules/scripts/DomainControllerConfig.zip'
+param dscConfigScript string = 'https://github.com/fskelly/azure-lab/releases/download/dsc-scripts/DomainControllerConfig.zip'
 param domainFqdn string = 'fskelly.com'
 param newForest bool = true
 
@@ -53,7 +53,7 @@ var zones = [for i in range(0, count): contains(azRegions, location) ? [
 
 
 param bastionSubnetIpPrefix string = '10.0.0.128/27'
-param bastionHostName string
+var bastionHostName = '${prefix}-${regionShortCode}-adds-bastion'
 var bastionSubnetName = 'AzureBastionSubnet'
 var publicIpAddressName = '${bastionHostName}-pip'
 
