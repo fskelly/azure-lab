@@ -60,7 +60,7 @@ var managedIdentityName = '${prefix}-${regionShortCode}-msi1'
 var fullManagedIdentityID = '/subscriptions/949ef534-07f5-4138-8b79-aae16a71310c/resourceGroups/${rgName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/${managedIdentityName}'
 var domainAdminUsername = '${localAdminUsername}@${domainFqdn}'
 
-module vnet './modules/vnet.bicep' = {
+module vnet './adModules/vnet.bicep' = {
   name: 'vnet-deploy'
   params: {
     vnetName: vnetName
@@ -69,7 +69,7 @@ module vnet './modules/vnet.bicep' = {
   }
 }
 
-module managedIdentity './modules/mi.bicep' = {
+module managedIdentity './adModules/mi.bicep' = {
   name: 'deploy-managedIdentity'
   params: {
     managedIdentityName: managedIdentityName
@@ -77,7 +77,7 @@ module managedIdentity './modules/mi.bicep' = {
   
 }
 
-module avSet './modules/avset.bicep' = {//}= if (zones == []) {
+module avSet './adModules/avset.bicep' = {//}= if (zones == []) {
   name: 'deploy-avset'
   params :{
     avSetName: avSetName
@@ -113,7 +113,7 @@ resource nics 'Microsoft.Network/networkInterfaces@2020-11-01' = [for i in range
   }
 }]
 
-module nicsDns './modules/nicDns.bicep' = {
+module nicsDns './adModules/nicDns.bicep' = {
   name: 'set-dns-nic'
   params: {
     dnsServers: dnsServers
@@ -126,7 +126,7 @@ module nicsDns './modules/nicDns.bicep' = {
   }
 }
 
-module vmProperties './modules/vmPropertiesBuilder.bicep' = {
+module vmProperties './adModules/vmPropertiesBuilder.bicep' = {
   name: 'Properties-Builder'
   params: {
     ahub: ahub
