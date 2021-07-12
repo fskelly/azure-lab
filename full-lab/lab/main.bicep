@@ -1,3 +1,4 @@
+param subID string
 param prefix string
 param regionShortCode string
 param rgName string
