@@ -33,7 +33,7 @@ param newForest bool = true
 param domainAdminPassword string
 param site string = 'Default-First-Site-Name'
 
-param psScriptLocation string = 'https://raw.githubusercontent.com/lukearp/Azure-IAC-Bicep/master/Scripts/Restart-Vms/restart-vms.ps1'
+param psScriptLocation string = 'https://raw.githubusercontent.com/fskelly/azure-lab/main/full-lab/lab/adModules/scripts/restart-vms.ps1'
 
 //var managedIdentityId = managedIdentity.outputs.managedIdentityID
 

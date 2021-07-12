@@ -6,12 +6,12 @@ foreach ($vm in $vms) {
         Stop-AzVM -Name $vm -ResourceGroupName $args[1] -Force -Confirm:$false;
     }
 }
-sleep 15;
+start-sleep 15;
 foreach ($vm in $vms) {
     if($vm -ne "")
     {
         Start-AzVM -Name $vm -ResourceGroupName $args[1];
     }
 }
-sleep 120
+start-sleep 120
 $vms
