@@ -1,2 +1,0 @@
-add bastion to vnet
-AzureBastionSubnet 10.0.0.128/27
