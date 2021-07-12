@@ -24,7 +24,7 @@ param localAdminUsername string = 'azure_ad_groot'
 param localAdminPassword string
 param timeZoneId string = 'Eastern Standard Time'
 
-param dscConfigScript string = 'https://github.com/lukearp/Azure-IAC-Bicep/releases/download/DSC/DomainControllerConfig.zip'
+param dscConfigScript string = 'https://github.com/fskelly/azure-lab/blob/main/full-lab/lab/adModules/scripts/DomainControllerConfig.zip'
 param domainFqdn string = 'fskelly.com'
 param newForest bool = true
 
