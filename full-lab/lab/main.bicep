@@ -64,7 +64,7 @@ var domainSite = newForest == true ? 'Default-First-Site-Name' : site
 var vnetName = '${prefix}-${regionShortCode}-adds-vnet'
 var avSetName = '${prefix}-${regionShortCode}-avset-1'
 var managedIdentityName = '${prefix}-${regionShortCode}-msi1'
-var fullManagedIdentityID = '/subscriptions/949ef534-07f5-4138-8b79-aae16a71310c/resourceGroups/${rgName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/${managedIdentityName}'
+var fullManagedIdentityID = '/subscriptions/${subID}/resourceGroups/${rgName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/${managedIdentityName}'
 var domainAdminUsername = '${localAdminUsername}@${domainFqdn}'
 
 module vnet './adModules/vnet.bicep' = {
