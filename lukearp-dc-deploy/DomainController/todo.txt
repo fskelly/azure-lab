@@ -1,8 +1,0 @@
-Vnet creation bicep
-ID: /subscriptions/949ef534-07f5-4138-8b79-aae16a71310c/resourceGroups/flkelly-neu-identity-2/providers/Microsoft.Network/virtualNetworks/vnet1
-
-Managed Identity bicep
-id: /subscriptions/949ef534-07f5-4138-8b79-aae16a71310c/resourceGroups/flkelly-neu-identity-2/providers/Microsoft.ManagedIdentity/userAssignedIdentities/neu-mi-1
-
-Availabilty Set bicep
-id: 
