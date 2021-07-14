@@ -1,7 +1,9 @@
 ## location to be deployed into
-$rgLocation = "northeurope"
-$rgName = "flkelly-neu-identity-test-101"
+## resource group name of the resource group to be created
+$rgLocation = ""
+$rgName = ""
 
+## subscription ID for the managed identity
 $subID = read-host "Please enter your Sub ID, used fo the managed identity."
 
 ## add tags if you want to add metadata
