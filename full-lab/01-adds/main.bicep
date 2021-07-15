@@ -21,14 +21,14 @@ param vmSize string = 'Standard_B2ms'
 param ahub bool = false
 param ntdsSizeGB int = 20
 param sysVolSizeGB int = 20
-param localAdminUsername string = 'azure_ad_groot'
+param localAdminUsername string
 @secure()
 param localAdminPassword string
 param timeZoneId string = 'Eastern Standard Time'
 
 param dscConfigScript string = 'https://github.com/fskelly/azure-lab/releases/download/dsc-scripts/DomainControllerConfig.zip'
 //param dscConfigScript string = 'https://github.com/lukearp/Azure-IAC-Bicep/releases/download/DSC/DomainControllerConfig.zip'
-param domainFqdn string = 'fskelly.com'
+param domainFqdn string
 param newForest bool = true
 
 //param domainAdminUsername string = 'azure_ad_groot@fskelly.com'
@@ -349,3 +349,7 @@ resource rebootOtherVms 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
     otherDcExtension     
   ]    
 }
+
+
+output domainAdminUsername string = domainAdminUsername
+output localAdminUsername string = localAdminUsername
