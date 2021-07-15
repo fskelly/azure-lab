@@ -36,7 +36,8 @@ param newForest bool = true
 param domainAdminPassword string
 param site string = 'Default-First-Site-Name'
 
-param psScriptLocation string = 'https://raw.githubusercontent.com/lukearp/Azure-IAC-Bicep/master/Scripts/Restart-Vms/restart-vms.ps1'
+param psScriptLocation string = 'https://raw.githubusercontent.com/fskelly/azure-lab/main/full-lab/lab/adModules/scripts/restart-vms.ps1'
+//param psScriptLocation string = 'https://raw.githubusercontent.com/lukearp/Azure-IAC-Bicep/master/Scripts/Restart-Vms/restart-vms.ps1'
 
 //var managedIdentityId = managedIdentity.outputs.managedIdentityID
 
@@ -77,6 +78,29 @@ resource publicIp 'Microsoft.Network/publicIpAddresses@2020-05-01' = {
   properties: {
     publicIPAllocationMethod: 'Static'
   }
+}
+
+resource bastionHost 'Microsoft.Network/bastionHosts@2020-05-01' = {
+  name: bastionHostName
+  location: location
+  properties: {
+    ipConfigurations: [
+      {
+        name: 'IpConf'
+        properties: {
+          subnet: {
+            id: vnet.outputs.bastionSubnetID
+          }
+          publicIPAddress: {
+            id: publicIp.id
+          }
+        }
+      }
+    ]
+  }
+  dependsOn: [
+    vnet
+  ]
 }
 
 module vnet './modules/vnet.bicep' = {
