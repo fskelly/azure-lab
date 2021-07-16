@@ -353,3 +353,5 @@ resource rebootOtherVms 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
 
 output domainAdminUsername string = domainAdminUsername
 output localAdminUsername string = localAdminUsername
+output identityVnetRG string = resourceGroup().name
+output identityVnetName string = vnetName
