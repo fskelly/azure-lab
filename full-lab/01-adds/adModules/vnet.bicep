@@ -3,7 +3,6 @@ param vnetName string
 param addressSpacePrefix string
 param vnetPrefix string
 param vnetLocation string = resourceGroup().location
-
 param resourceTags object = {
   Environment: 'Dev'
   Project: 'Tutorial'

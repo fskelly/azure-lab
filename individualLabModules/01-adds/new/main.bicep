@@ -1,10 +1,14 @@
-param subID string
+param subscriptionID string
+
 param prefix string
 param regionShortCode string
 param rgName string
 
 param addressSpacePrefix string = '10.0.0.0/24'
 param vnetPrefix string = '10.0.0.0/25'
+//param vnetName string = 'flkelly-adds-vnet'
+//param managedIdentityName string = 'flkelly-neu-msi1'
+//param avSetName string = 'flkelly-neu-avset-1'
 
 param vmNamePrefix string = 'dc'
 param dnsServers array = [
@@ -17,20 +21,23 @@ param vmSize string = 'Standard_B2ms'
 param ahub bool = false
 param ntdsSizeGB int = 20
 param sysVolSizeGB int = 20
-param localAdminUsername string
+param localAdminUsername string = 'azure_ad_groot'
 @secure()
 param localAdminPassword string
 param timeZoneId string = 'Eastern Standard Time'
 
-param dscConfigScript string = 'https://github.com/fskelly/azure-lab/releases/download/dsc-scripts/DomainControllerConfig.zip'
-param domainFqdn string
+param dscConfigScript string = 'https://github.com/lukearp/Azure-IAC-Bicep/releases/download/DSC/DomainControllerConfig.zip'
+param domainFqdn string = 'fskelly.com'
 param newForest bool = true
 
+//param domainAdminUsername string = 'azure_ad_groot@fskelly.com'
 @secure()
 param domainAdminPassword string
 param site string = 'Default-First-Site-Name'
 
-param psScriptLocation string = 'https://raw.githubusercontent.com/fskelly/azure-lab/test-branch/scripts/restart-vms/restart-vms.ps1'
+param psScriptLocation string = 'https://raw.githubusercontent.com/lukearp/Azure-IAC-Bicep/master/Scripts/Restart-Vms/restart-vms.ps1'
+
+//var managedIdentityId = managedIdentity.outputs.managedIdentityID
 
 var azRegions = [
   'eastus'
@@ -45,34 +52,26 @@ var zones = [for i in range(0, count): contains(azRegions, location) ? [
   string(i == 0 || i == 3 || i == 6 ? 1 : i == 1 || i == 4 || i == 7 ? 2 : 3)
 ] : []]
 
-
-param bastionSubnetIpPrefix string = '10.0.0.128/27'
-var bastionHostName = '${prefix}-${regionShortCode}-adds-bastion'
-var bastionSubnetName = 'AzureBastionSubnet'
-var publicIpAddressName = '${bastionHostName}-pip'
-
 var domainUserName = newForest == true ? '${split(domainFqdn,'.')[0]}\\${localAdminUsername}' : domainAdminUsername
 var domainPassword = newForest == true ? localAdminPassword : domainAdminPassword
 var domainSite = newForest == true ? 'Default-First-Site-Name' : site
 
 var vnetName = '${prefix}-${regionShortCode}-adds-vnet'
-var avSetName = '${prefix}-${regionShortCode}-adds-avset-1'
-var managedIdentityName = '${prefix}-${regionShortCode}-adds-msi1'
-var fullManagedIdentityID = '/subscriptions/${subID}/resourceGroups/${rgName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/${managedIdentityName}'
+var avSetName = '${prefix}-${regionShortCode}-avset-1'
+var managedIdentityName = '${prefix}-${regionShortCode}-msi1'
+var fullManagedIdentityID = '/subscriptions/${subscriptionID}/resourceGroups/${rgName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/${managedIdentityName}'
 var domainAdminUsername = '${localAdminUsername}@${domainFqdn}'
 
-module vnet './adModules/vnet.bicep' = {
+module vnet './modules/vnet.bicep' = {
   name: 'vnet-deploy'
   params: {
     vnetName: vnetName
     addressSpacePrefix: addressSpacePrefix
     vnetPrefix: vnetPrefix
-    bastionSubnetName: bastionSubnetName
-    bastionSubnetIpPrefix: bastionSubnetIpPrefix
   }
 }
 
-module managedIdentity './adModules/mi.bicep' = {
+module managedIdentity './modules/mi.bicep' = {
   name: 'deploy-managedIdentity'
   params: {
     managedIdentityName: managedIdentityName
@@ -80,46 +79,23 @@ module managedIdentity './adModules/mi.bicep' = {
   
 }
 
-module avSet './adModules/avset.bicep' = {
+module avSet './modules/avset.bicep' = {//}= if (zones == []) {
   name: 'deploy-avset'
   params :{
     avSetName: avSetName
   }  
 }
 
-resource publicIp 'Microsoft.Network/publicIpAddresses@2020-05-01' = {
-  name: publicIpAddressName
-  location: location
-  sku: {
-    name: 'Standard'
+/* module nics './modules/nics.bicep' = {
+  name: 'deploy-nics'
+  params: {
+    subnetName: vnet.outputs.subnetName
+    vnetID: vnet.outputs.vnetID
+    vmNamePrefix: vmNamePrefix
+    location: resourceGroup().location
   }
-  properties: {
-    publicIPAllocationMethod: 'Static'
-  }
-}
-
-resource bastionHost 'Microsoft.Network/bastionHosts@2020-05-01' = {
-  name: bastionHostName
-  location: location
-  properties: {
-    ipConfigurations: [
-      {
-        name: 'IpConf'
-        properties: {
-          subnet: {
-            id: vnet.outputs.bastionSubnetID
-          }
-          publicIPAddress: {
-            id: publicIp.id
-          }
-        }
-      }
-    ]
-  }
-  dependsOn: [
-    vnet
-  ]
-}
+  
+} */
 
 resource nics 'Microsoft.Network/networkInterfaces@2020-11-01' = [for i in range(0, count): {
   name: '${vmNamePrefix}-${i + 1}-nic'
@@ -139,7 +115,7 @@ resource nics 'Microsoft.Network/networkInterfaces@2020-11-01' = [for i in range
   }
 }]
 
-module nicsDns './adModules/nicDns.bicep' = {
+module nicsDns './modules/nicDns.bicep' = {
   name: 'set-dns-nic'
   params: {
     dnsServers: dnsServers
@@ -152,7 +128,7 @@ module nicsDns './adModules/nicDns.bicep' = {
   }
 }
 
-module vmProperties './adModules/vmPropertiesBuilder.bicep' = {
+module vmProperties './modules/vmPropertiesBuilder.bicep' = {
   name: 'Properties-Builder'
   params: {
     ahub: ahub
@@ -234,6 +210,7 @@ resource rebootDc1 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   identity: {
     type: 'UserAssigned'
     userAssignedIdentities: {
+      //'/subscriptions/949ef534-07f5-4138-8b79-aae16a71310c/resourceGroups/flkelly-neu-identity-4/providers/Microsoft.ManagedIdentity/userAssignedIdentities/${managedIdentityName}':{}
       '${fullManagedIdentityID}':{}
 
     }  
@@ -315,6 +292,7 @@ resource rebootOtherVms 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
     type: 'UserAssigned'
     userAssignedIdentities: {
       '${fullManagedIdentityID}':{}
+//      '/subscriptions/949ef534-07f5-4138-8b79-aae16a71310c/resourceGroups/flkelly-neu-identity-4/providers/Microsoft.ManagedIdentity/userAssignedIdentities/${managedIdentityName}':{}
     }  
   } 
   properties: {
@@ -327,8 +305,3 @@ resource rebootOtherVms 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
     otherDcExtension     
   ]    
 }
-
-output username string = domainAdminUsername
-output vnetID string = vnet.outputs.vnetID
-output subnetName string = vnet.outputs.subnetName
-output rgName string = resourceGroup().name
