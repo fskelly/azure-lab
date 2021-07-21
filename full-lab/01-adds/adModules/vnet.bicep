@@ -1,13 +1,14 @@
+param resourceTags object = {
+  Environment: 'Dev'
+  Project: 'Tutorial'
+  Purpose: 'Identity'
+}
+
 // Param Section
 param vnetName string
 param addressSpacePrefix string
 param vnetPrefix string
 param vnetLocation string = resourceGroup().location
-param resourceTags object = {
-  Environment: 'Dev'
-  Project: 'Tutorial'
-  Purpose: 'Hybrid Connectivity'
-}
 
 param bastionSubnetName string
 param bastionSubnetIpPrefix string

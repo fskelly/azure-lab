@@ -1,19 +1,41 @@
+## IDENTITY - AD
+
 ## resource group name to be created
 ## location to be deployed into
-$rgLocation = read-host "Enter the location for the resource group."
-$rgName = read-host "Enter the name of the resource group to be created."
+$identityRGLocation = read-host "Enter the location for the IDENTITY resource group."
+$identityRGName = read-host "Enter the name of the IDENTITY resource group to be created."
+
 
 ## subscription id for Managed Identity
 $subID = read-host "Please enter your Sub ID, used fo the managed identity."
 
+
 ## add tags if you want to add metadata
-$tags = @{"Purpose"="Identity"; "Can Be Deleted"="no"}
+$identityRGTags = @{"Purpose"="Identity"; "Can Be Deleted"="no"; "IaC"="Bicep💪"}
 #use this command when you need to create a new resource group for your deployment
-$rg = New-AzResourceGroup -Name $rgName -Location $rgLocation 
-New-AzTag -ResourceId $rg.ResourceId -Tag $tags
+$identityRG = New-AzResourceGroup -Name $identityRGName -Location $identityRGLocation 
+New-AzTag -ResourceId $identityRG.ResourceId -Tag $identityRGTags
 
 ## Bicep File name
-$bicepFile = ".\main.bicep"
-$deploymentName = ($bicepFile).Substring(2) + "-" +(get-date -Format ddMMyyyy-hhmmss) + "-deployment"
-New-AzResourceGroupDeployment -ResourceGroupName $rgName -TemplateFile $bicepFile -DeploymentName $deploymentName -prefix flkelly -regionShortcode neu -rgName $rgName -subID $subID
+$identityBicepFile = ".\01-adds\main.bicep"
+$identityDeploymentName = (($identityBicepFile).Substring(2)).Replace("\","-") + "-" +(get-date -Format ddMMyyyy-hhmmss) + "-deployment"
+New-AzResourceGroupDeployment -ResourceGroupName $identityRGName -TemplateFile $identityBicepFile -DeploymentName $identityDeploymentName -prefix flkelly -regionShortcode neu -rgName $identityRGName -subID $subID
 
+## CONNECTIVITY - networking
+
+#$identityVnetID = (Get-AzResourceGroupDeployment -ResourceGroupName $identityRGName -Name $identityDeploymentName).Outputs.vnetID.value
+$identityVnetName = (Get-AzResourceGroupDeployment -ResourceGroupName $identityRGName -Name $identityDeploymentName).Outputs.vnetName.value
+
+$connectivityRGLocation = read-host "Enter the location for the resource group."
+$connectivityRGName = read-host "Enter the name of the resource group to be created."
+
+## add tags if you want to add metadata
+$connectivityRGTags = @{"Purpose"="Connectivity"; "Can Be Deleted"="no"; "IaC"="Bicep💪"}
+#use this command when you need to create a new resource group for your deployment
+$connectivityRG = New-AzResourceGroup -Name $connectivityRGName -Location $connectivityRGLocation 
+New-AzTag -ResourceId $connectivityRG.ResourceId -Tag $connectivityRGTags
+
+## Bicep File name
+$connectivityBicepFile = ".\02-restOfLab\mainNONRG.bicep"
+$connectivityDeploymentName = (($connectivityBicepFile).Substring(2)).Replace("\","-") + "-" +(get-date -Format ddMMyyyy-hhmmss) + "-deployment"
+New-AzResourceGroupDeployment -ResourceGroupName $connectivityRGName -TemplateFile $connectivityBicepFile -DeploymentName $connectivityDeploymentName -prefix flkelly -regionShortcode neu -identityVnetRG $identityRGName -identityVnetName $identityVnetName

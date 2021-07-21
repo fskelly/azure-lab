@@ -84,7 +84,8 @@ output vmProperties array = [for i in range(0,count): ahub == true && zones != [
   osProfile: {
     adminPassword: localAdminPassword
     adminUsername: localAdminUsername
-    computerName: concat(vmNamePrefix,'-',i + 1)
+    computerName: '${vmNamePrefix}-${i+1}'
+    //computerName: concat(vmNamePrefix,'-',i + 1)
     windowsConfiguration: {
       timeZone: timeZoneId
       enableAutomaticUpdates: true     
@@ -107,14 +108,16 @@ output vmProperties array = [for i in range(0,count): ahub == true && zones != [
         createOption: 'Empty'
         diskSizeGB: ntdsSizeGB
         lun: 0
-        name: concat(vmNamePrefix,'-',i + 1,'-ntds-disk')         
+        name: '${vmNamePrefix}-${i+1}-ntds-disk'
+        //name: concat(vmNamePrefix,'-',i + 1,'-ntds-disk')         
       }
       {
        caching: 'None'
        createOption: 'Empty'
        diskSizeGB: sysVolSizeGB
        lun: 1
-       name: concat(vmNamePrefix,'-',i + 1,'-sysVol-disk')         
+       name: '${vmNamePrefix}-${i+1}-sysvol-disk'
+       //name: concat(vmNamePrefix,'-',i + 1,'-sysVol-disk')         
      }
     ]   
   }
@@ -138,7 +141,8 @@ output vmProperties array = [for i in range(0,count): ahub == true && zones != [
   osProfile: {
     adminPassword: localAdminPassword
     adminUsername: localAdminUsername
-    computerName: concat(vmNamePrefix,'-',i + 1)
+    computerName: '${vmNamePrefix}-${i+1}'
+    //computerName: concat(vmNamePrefix,'-',i + 1)
     windowsConfiguration: {
       timeZone: timeZoneId
       enableAutomaticUpdates: true     
@@ -161,14 +165,16 @@ output vmProperties array = [for i in range(0,count): ahub == true && zones != [
         createOption: 'Empty'
         diskSizeGB: ntdsSizeGB
         lun: 0
-        name: concat(vmNamePrefix,'-',i + 1,'-ntds-disk')         
+        name: '${vmNamePrefix}-${i+1}-ntds-disk'
+        //name: concat(vmNamePrefix,'-',i + 1,'-ntds-disk')         
       }
       {
        caching: 'None'
        createOption: 'Empty'
        diskSizeGB: sysVolSizeGB
        lun: 1
-       name: concat(vmNamePrefix,'-',i + 1,'-sysVol-disk')         
+       name: '${vmNamePrefix}-${i+1}-sysvol-disk'
+       //name: concat(vmNamePrefix,'-',i + 1,'-sysVol-disk')         
      }
     ]   
   }
@@ -189,7 +195,8 @@ output vmProperties array = [for i in range(0,count): ahub == true && zones != [
   osProfile: {
     adminPassword: localAdminPassword
     adminUsername: localAdminUsername
-    computerName: concat(vmNamePrefix,'-',i + 1)
+    computerName: '${vmNamePrefix}-${i+1}'
+    //computerName: concat(vmNamePrefix,'-',i + 1)
     windowsConfiguration: {
       timeZone: timeZoneId
       enableAutomaticUpdates: true     
@@ -212,14 +219,16 @@ output vmProperties array = [for i in range(0,count): ahub == true && zones != [
         createOption: 'Empty'
         diskSizeGB: ntdsSizeGB
         lun: 0
-        name: concat(vmNamePrefix,'-',i + 1,'-ntds-disk')         
+        name: '${vmNamePrefix}-${i+1}-ntds-disk'
+        //name: concat(vmNamePrefix,'-',i + 1,'-ntds-disk')         
       }
       {
        caching: 'None'
        createOption: 'Empty'
        diskSizeGB: sysVolSizeGB
        lun: 1
-       name: concat(vmNamePrefix,'-',i + 1,'-sysVol-disk')         
+       name: '${vmNamePrefix}-${i+1}-sysvol-disk'
+       //name: concat(vmNamePrefix,'-',i + 1,'-sysVol-disk')         
      }
     ]   
   }

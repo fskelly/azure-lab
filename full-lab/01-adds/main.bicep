@@ -1,10 +1,17 @@
+param resourceTags object = {
+  Environment: 'Dev'
+  Project: 'Tutorial'
+  Purpose: 'Identity'
+  IaC: 'Bicep💪'
+}
+
 param subID string
 param prefix string
 param regionShortCode string
 param rgName string
 
-param addressSpacePrefix string = '10.0.0.0/24'
-param vnetPrefix string = '10.0.0.0/25'
+param addressSpacePrefix string = '172.16.0.0/24'
+param vnetPrefix string = '172.16.0.0/25'
 
 param vmNamePrefix string = 'dc'
 param dnsServers array = [
@@ -46,7 +53,7 @@ var zones = [for i in range(0, count): contains(azRegions, location) ? [
 ] : []]
 
 
-param bastionSubnetIpPrefix string = '10.0.0.128/27'
+param bastionSubnetIpPrefix string = '172.16.0.128/27'
 var bastionHostName = '${prefix}-${regionShortCode}-adds-bastion'
 var bastionSubnetName = 'AzureBastionSubnet'
 var publicIpAddressName = '${bastionHostName}-pip'
@@ -89,6 +96,7 @@ module avSet './adModules/avset.bicep' = {
 
 resource publicIp 'Microsoft.Network/publicIpAddresses@2020-05-01' = {
   name: publicIpAddressName
+  tags: resourceTags
   location: location
   sku: {
     name: 'Standard'
@@ -100,6 +108,7 @@ resource publicIp 'Microsoft.Network/publicIpAddresses@2020-05-01' = {
 
 resource bastionHost 'Microsoft.Network/bastionHosts@2020-05-01' = {
   name: bastionHostName
+  tags: resourceTags
   location: location
   properties: {
     ipConfigurations: [
@@ -123,6 +132,7 @@ resource bastionHost 'Microsoft.Network/bastionHosts@2020-05-01' = {
 
 resource nics 'Microsoft.Network/networkInterfaces@2020-11-01' = [for i in range(0, count): {
   name: '${vmNamePrefix}-${i + 1}-nic'
+  tags: resourceTags
   location: location
   properties: {
     ipConfigurations: [
@@ -174,6 +184,7 @@ module vmProperties './adModules/vmPropertiesBuilder.bicep' = {
 
 resource dc1 'Microsoft.Compute/virtualMachines@2020-12-01' = {
   name: '${vmNamePrefix}-1'
+  tags: resourceTags
   location: location
   zones: zones[0]
   properties: vmProperties.outputs.vmProperties[0]
@@ -181,6 +192,7 @@ resource dc1 'Microsoft.Compute/virtualMachines@2020-12-01' = {
 
 resource dc1Extension 'Microsoft.Compute/virtualMachines/extensions@2020-12-01' = {
   name: '${vmNamePrefix}-1/DC-Creation'
+  tags: resourceTags
   location: location
   dependsOn: [
     dc1
@@ -229,6 +241,7 @@ resource dc1Extension 'Microsoft.Compute/virtualMachines/extensions@2020-12-01' 
 
 resource rebootDc1 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   kind: 'AzurePowerShell'
+  tags: resourceTags
   location: location
   name: '${dc1.name}-rebootDc'
   identity: {
@@ -253,6 +266,7 @@ resource otherDc 'Microsoft.Compute/virtualMachines@2020-12-01' = if(count > 1) 
   dependsOn: [
     rebootDc1
   ]
+  tags: resourceTags
   location: location
   name: '${vmNamePrefix}-2'
   zones: zones[1]
@@ -262,6 +276,7 @@ resource otherDc 'Microsoft.Compute/virtualMachines@2020-12-01' = if(count > 1) 
 resource otherDcExtension 'Microsoft.Compute/virtualMachines/extensions@2020-12-01' = if(count > 1){
   name: '${vmNamePrefix}-2/DC-Creation'
   location: location
+  tags: resourceTags
   dependsOn: [
     otherDc
   ]
@@ -309,6 +324,7 @@ resource otherDcExtension 'Microsoft.Compute/virtualMachines/extensions@2020-12-
 
 resource rebootOtherVms 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   kind: 'AzurePowerShell'
+  tags: resourceTags
   location: location
   name: '${otherDc.name}-rebootOtherVms'
   identity: {
@@ -329,6 +345,7 @@ resource rebootOtherVms 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
 }
 
 output username string = domainAdminUsername
+output vnetName string = vnetName
 output vnetID string = vnet.outputs.vnetID
 output subnetName string = vnet.outputs.subnetName
 output rgName string = resourceGroup().name

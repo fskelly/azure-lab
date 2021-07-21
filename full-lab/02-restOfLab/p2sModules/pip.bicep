@@ -20,4 +20,4 @@ resource publicIPAddress 'Microsoft.Network/publicIPAddresses@2019-11-01' = {
 }
 
 output pipID string = publicIPAddress.id
-output pipIP string = publicIPAddress.properties.ipAddress
+//output pipIP string = publicIPAddress.properties.ipAddress

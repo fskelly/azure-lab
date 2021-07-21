@@ -1,3 +1,10 @@
+param resourceTags object = {
+  Environment: 'Dev'
+  Project: 'Tutorial'
+  Purpose: 'Identity'
+}
+
+
 param nics array
 param dnsServers array
 param count int
@@ -7,6 +14,7 @@ var dnsIps = [for i in range(0,count): nics[i].ipConfigurations[0].properties.pr
 
 resource nicsDns 'Microsoft.Network/networkInterfaces@2020-11-01' = [for i in range(0,count): {
   name: nics[i].name
+  tags: resourceTags
   location: location 
   properties: {
     dnsSettings: {

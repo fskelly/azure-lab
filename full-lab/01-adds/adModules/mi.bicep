@@ -1,3 +1,9 @@
+param resourceTags object = {
+  Environment: 'Dev'
+  Project: 'Tutorial'
+  Purpose: 'Identity'
+}
+
 param managedIdentityName string
 //param roleDefinitionId string = 'b24988ac-6180-42a0-ab88-20f7382dd24c'
 param roleNameGuid string = newGuid()
@@ -17,6 +23,7 @@ var role = {
 
 resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = {
   name: managedIdentityName
+  tags: resourceTags
   location: resourceGroup().location
   
 }
