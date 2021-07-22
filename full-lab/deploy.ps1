@@ -19,7 +19,7 @@ New-AzTag -ResourceId $identityRG.ResourceId -Tag $identityRGTags
 ## Bicep File name
 $identityBicepFile = ".\01-adds\main.bicep"
 $identityDeploymentName = (($identityBicepFile).Substring(2)).Replace("\","-") + "-" +(get-date -Format ddMMyyyy-hhmmss) + "-deployment"
-New-AzResourceGroupDeployment -ResourceGroupName $identityRGName -TemplateFile $identityBicepFile -DeploymentName $identityDeploymentName -prefix flkelly -regionShortcode neu -rgName $identityRGName -subID $subID
+New-AzResourceGroupDeployment -ResourceGroupName $identityRGName -TemplateFile $identityBicepFile -DeploymentName $identityDeploymentName -rgName $identityRGName -subID $subID
 
 ## CONNECTIVITY - networking
 
@@ -38,4 +38,4 @@ New-AzTag -ResourceId $connectivityRG.ResourceId -Tag $connectivityRGTags
 ## Bicep File name
 $connectivityBicepFile = ".\02-restOfLab\mainNONRG.bicep"
 $connectivityDeploymentName = (($connectivityBicepFile).Substring(2)).Replace("\","-") + "-" +(get-date -Format ddMMyyyy-hhmmss) + "-deployment"
-New-AzResourceGroupDeployment -ResourceGroupName $connectivityRGName -TemplateFile $connectivityBicepFile -DeploymentName $connectivityDeploymentName -prefix flkelly -regionShortcode neu -identityVnetRG $identityRGName -identityVnetName $identityVnetName
+New-AzResourceGroupDeployment -ResourceGroupName $connectivityRGName -TemplateFile $connectivityBicepFile -DeploymentName $connectivityDeploymentName -identityVnetRG $identityRGName -identityVnetName $identityVnetName

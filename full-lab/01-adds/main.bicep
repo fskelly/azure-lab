@@ -10,8 +10,8 @@ param prefix string
 param regionShortCode string
 param rgName string
 
-param addressSpacePrefix string = '172.16.0.0/24'
-param vnetPrefix string = '172.16.0.0/25'
+param addressSpacePrefix string = '10.0.0.0/24'
+param vnetPrefix string = '10.0.0.0/25'
 
 param vmNamePrefix string = 'dc'
 param dnsServers array = [
@@ -33,6 +33,7 @@ param dscConfigScript string = 'https://github.com/fskelly/azure-lab/releases/do
 param domainFqdn string
 param newForest bool = true
 
+param domainAdminUserName string
 @secure()
 param domainAdminPassword string
 param site string = 'Default-First-Site-Name'
@@ -53,7 +54,7 @@ var zones = [for i in range(0, count): contains(azRegions, location) ? [
 ] : []]
 
 
-param bastionSubnetIpPrefix string = '172.16.0.128/27'
+param bastionSubnetIpPrefix string = '10.0.0.128/27'
 var bastionHostName = '${prefix}-${regionShortCode}-adds-bastion'
 var bastionSubnetName = 'AzureBastionSubnet'
 var publicIpAddressName = '${bastionHostName}-pip'
@@ -66,10 +67,12 @@ var vnetName = '${prefix}-${regionShortCode}-adds-vnet'
 var avSetName = '${prefix}-${regionShortCode}-adds-avset-1'
 var managedIdentityName = '${prefix}-${regionShortCode}-adds-msi1'
 var fullManagedIdentityID = '/subscriptions/${subID}/resourceGroups/${rgName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/${managedIdentityName}'
-var domainAdminUsername = '${localAdminUsername}@${domainFqdn}'
+var domainAdminUsername = '${domainAdminUserName}@${domainFqdn}'
+
+
 
 module vnet './adModules/vnet.bicep' = {
-  name: 'vnet-deploy'
+  name: 'deploy-vnet'
   params: {
     vnetName: vnetName
     addressSpacePrefix: addressSpacePrefix
@@ -94,7 +97,7 @@ module avSet './adModules/avset.bicep' = {
   }  
 }
 
-resource publicIp 'Microsoft.Network/publicIpAddresses@2020-05-01' = {
+/* resource publicIp 'Microsoft.Network/publicIpAddresses@2020-05-01' = {
   name: publicIpAddressName
   tags: resourceTags
   location: location
@@ -104,9 +107,18 @@ resource publicIp 'Microsoft.Network/publicIpAddresses@2020-05-01' = {
   properties: {
     publicIPAllocationMethod: 'Static'
   }
+} */
+
+module publicIp './adModules/pip.bicep' = {
+  name: 'deploy-pip'
+  params: {
+    location: resourceGroup().location
+    publicIpAddressName: publicIpAddressName
+
+  }
 }
 
-resource bastionHost 'Microsoft.Network/bastionHosts@2020-05-01' = {
+/* resource bastionHost 'Microsoft.Network/bastionHosts@2020-05-01' = {
   name: bastionHostName
   tags: resourceTags
   location: location
@@ -119,7 +131,7 @@ resource bastionHost 'Microsoft.Network/bastionHosts@2020-05-01' = {
             id: vnet.outputs.bastionSubnetID
           }
           publicIPAddress: {
-            id: publicIp.id
+            id: publicIp.outputs.publicIpID
           }
         }
       }
@@ -128,9 +140,21 @@ resource bastionHost 'Microsoft.Network/bastionHosts@2020-05-01' = {
   dependsOn: [
     vnet
   ]
-}
+} */
 
-resource nics 'Microsoft.Network/networkInterfaces@2020-11-01' = [for i in range(0, count): {
+module bastionHost './adModules/bastion.bicep' = {
+  name: 'deploy-bastionHost'
+  params: {
+    bastionHostName: bastionHostName
+    bastionSubnetID: vnet.outputs.bastionSubnetID
+    location: resourceGroup().location
+    publicIpID: publicIp.outputs.publicIpID
+  }
+  dependsOn: [
+    vnet
+  ]
+}
+/* resource nics 'Microsoft.Network/networkInterfaces@2020-11-01' = [for i in range(0, count): {
   name: '${vmNamePrefix}-${i + 1}-nic'
   tags: resourceTags
   location: location
@@ -147,6 +171,18 @@ resource nics 'Microsoft.Network/networkInterfaces@2020-11-01' = [for i in range
       }
     ]
   }
+}] */
+
+module nics './adModules/nics.bicep' = [for i in range(0, count): {
+  name: '${vmNamePrefix}-${i + 1}-nic'
+  params: {
+    vmNamePrefix: vmNamePrefix
+    vnetID: vnet.outputs.vnetID
+    //count: count
+    i: i
+    subnetName: vnet.outputs.subnetName
+    
+  }
 }]
 
 module nicsDns './adModules/nicDns.bicep' = {
@@ -155,7 +191,7 @@ module nicsDns './adModules/nicDns.bicep' = {
     dnsServers: dnsServers
     nics: [for i in range(0, count): {
       name: nics[i].name
-      ipConfigurations: nics[i].properties.ipConfigurations
+      ipConfigurations: nics[i].outputs.ipConfiguration
     }]
     count: count
     location: location
@@ -163,7 +199,7 @@ module nicsDns './adModules/nicDns.bicep' = {
 }
 
 module vmProperties './adModules/vmPropertiesBuilder.bicep' = {
-  name: 'Properties-Builder'
+  name: 'deploy-Properties-Builder'
   params: {
     ahub: ahub
     avsetId: avSet.outputs.avSetID
@@ -182,15 +218,35 @@ module vmProperties './adModules/vmPropertiesBuilder.bicep' = {
   }
 }
 
-resource dc1 'Microsoft.Compute/virtualMachines@2020-12-01' = {
+module dcConfigurationBuild './adModules/configureDCs.bicep' = {
+  name: 'deploy-dcs'
+  params: {
+    domainFqdn: domainFqdn
+    domainPassword: domainPassword
+    domainSite: domainSite
+    domainUserName: domainUserName
+    dscConfigScript: dscConfigScript
+    fullManagedIdentityID: fullManagedIdentityID
+    location: resourceGroup().location
+    newForest: newForest
+    psScriptLocation: psScriptLocation
+    vmNamePrefix: vmNamePrefix
+    zones: zones
+    dc1Properties: vmProperties.outputs.vmProperties[0]
+    dc2Properties: vmProperties.outputs.vmProperties[1]
+  }
+  
+}
+
+/* resource dc1 'Microsoft.Compute/virtualMachines@2020-12-01' = {
   name: '${vmNamePrefix}-1'
   tags: resourceTags
   location: location
   zones: zones[0]
   properties: vmProperties.outputs.vmProperties[0]
-}
+} */
 
-resource dc1Extension 'Microsoft.Compute/virtualMachines/extensions@2020-12-01' = {
+/* resource dc1Extension 'Microsoft.Compute/virtualMachines/extensions@2020-12-01' = {
   name: '${vmNamePrefix}-1/DC-Creation'
   tags: resourceTags
   location: location
@@ -260,9 +316,46 @@ resource rebootDc1 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   dependsOn: [
     dc1Extension 
   ]    
+} */
+/* module dc1 './adModules/dc1.bicep' = {
+  name: 'deploy-dc1'
+  params: {
+    domainFqdn: domainFqdn
+    domainPassword: domainPassword
+    domainSite: domainSite
+    domainUserName: domainUserName
+    dscConfigScript: dscConfigScript
+    fullManagedIdentityID: fullManagedIdentityID
+    location: resourceGroup().location
+    newForest: newForest
+    psScriptLocation: psScriptLocation
+    vmNamePrefix: vmNamePrefix
+    vmProperties: vmProperties.outputs.vmProperties[0]
+    zones: zones[0]
+  }
+  
 }
 
-resource otherDc 'Microsoft.Compute/virtualMachines@2020-12-01' = if(count > 1) {
+module dc2 './adModules/otherDc.bicep' = {
+  name: 'deploy-dc2'
+  params: {
+    domainFqdn: domainFqdn
+    domainPassword: domainPassword
+    domainSite: domainSite
+    domainUserName: domainUserName
+    dscConfigScript: dscConfigScript
+    fullManagedIdentityID: fullManagedIdentityID
+    location: resourceGroup().location
+    newForest: newForest
+    psScriptLocation: psScriptLocation
+    vmNamePrefix: vmNamePrefix
+    vmProperties: vmProperties.outputs.vmProperties[1]
+    zones: zones[0]
+  }
+  
+} */
+
+/* resource otherDc 'Microsoft.Compute/virtualMachines@2020-12-01' = if(count > 1) {
   dependsOn: [
     rebootDc1
   ]
@@ -343,7 +436,7 @@ resource rebootOtherVms 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
     otherDcExtension     
   ]    
 }
-
+ */
 output username string = domainAdminUsername
 output vnetName string = vnetName
 output vnetID string = vnet.outputs.vnetID

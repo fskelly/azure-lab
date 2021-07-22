@@ -7,9 +7,9 @@ param resourceTags object = {
   Purpose: 'Hybrid Connectivity'
   IaC: 'Bicep💪'
 }
-param addressSpacePrefix string = '10.0.0.0/24'
-param vnetPrefix string = '10.0.0.0/25'
-param gwPrefix string = '10.0.0.128/27'
+param addressSpacePrefix string = '10.1.0.0/24'
+param vnetPrefix string = '10.1.0.0/25'
+param gwPrefix string = '10.1.0.128/27'
 param onPremCIDR string = '192.168.1.0/24'
 param gwIP string
 @secure()
