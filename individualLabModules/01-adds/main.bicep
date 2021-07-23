@@ -2,6 +2,7 @@ param subID string
 param prefix string
 param regionShortCode string
 param rgName string
+param namingConvention string = '${prefix}-${regionShortCode}'
 
 param addressSpacePrefix string = '10.0.0.0/24'
 param vnetPrefix string = '10.0.0.0/25'
@@ -47,7 +48,7 @@ var zones = [for i in range(0, count): contains(azRegions, location) ? [
 
 
 param bastionSubnetIpPrefix string = '10.0.0.128/27'
-var bastionHostName = '${prefix}-${regionShortCode}-adds-bastion'
+var bastionHostName = '${namingConvention}-adds-bastion'
 var bastionSubnetName = 'AzureBastionSubnet'
 var publicIpAddressName = '${bastionHostName}-pip'
 
@@ -55,9 +56,9 @@ var domainUserName = newForest == true ? '${split(domainFqdn,'.')[0]}\\${localAd
 var domainPassword = newForest == true ? localAdminPassword : domainAdminPassword
 var domainSite = newForest == true ? 'Default-First-Site-Name' : site
 
-var vnetName = '${prefix}-${regionShortCode}-adds-vnet'
-var avSetName = '${prefix}-${regionShortCode}-adds-avset-1'
-var managedIdentityName = '${prefix}-${regionShortCode}-adds-msi1'
+var vnetName = '${namingConvention}-adds-vnet'
+var avSetName = '${namingConvention}-adds-avset-1'
+var managedIdentityName = '${namingConvention}-adds-msi1'
 var fullManagedIdentityID = '/subscriptions/${subID}/resourceGroups/${rgName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/${managedIdentityName}'
 var domainAdminUsername = '${localAdminUsername}@${domainFqdn}'
 
