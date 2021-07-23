@@ -1,18 +1,95 @@
+// General Params
 targetScope = 'subscription'
 
-param suffix string = 'blah1'
+param suffix string = 'blah-1'
 param subID string = '949ef534-07f5-4138-8b79-aae16a71310c'
+param namingConvention string = '${prefix}-${regionShortCode}'
 param prefix string = 'flkelly'
-param regionShortCode string
+param regionShortCode string = 'neu'
+
+//PARAMETERS
+
+// Keyvault Params
+//var vaultName = substring('${namingConvention}kv${uniqueString(keyVaultRG().)}',0,23) // must be globally unique
+param keyVaultRGLocation string = 'northeurope'
+param keyVaultResourceTags object = {
+  Environment: 'Dev'
+  Project: 'Tutorial'
+  Purpose: 'Security'
+  IaC: 'Bicep💪'
+}
+param sku string = 'Standard'
+param objectID string = '4ad6d4e3-4556-4135-979d-bdbd3a63f4ef'
+param tenantID string = '17ca67c9-6ef2-4396-89dd-c8a769cc1991' //replace with your tenantId
+param accessPolicies array = [
+  {
+    tenantId: tenantID
+    objectId: objectID // replace with your objectId
+    permissions: {
+      keys: [
+        'Get'
+        'List'
+        'Update'
+        'Create'
+        'Import'
+        'Delete'
+        'Recover'
+        'Backup'
+        'Restore'
+      ]
+      secrets: [
+        'Get'
+        'List'
+        'Set'
+        'Delete'
+        'Recover'
+        'Backup'
+        'Restore'
+      ]
+      certificates: [
+        'Get'
+        'List'
+        'Update'
+        'Create'
+        'Import'
+        'Delete'
+        'Recover'
+        'Backup'
+        'Restore'
+        'ManageContacts'
+        'ManageIssuers'
+        'GetIssuers'
+        'ListIssuers'
+        'SetIssuers'
+        'DeleteIssuers'
+      ]
+    }
+  }
+]
+param enabledForDeployment bool = true
+param enabledForTemplateDeployment bool = true
+param enabledForDiskEncryption bool = true
+param enableRbacAuthorization bool = false
+param softDeleteRetentionInDays int = 90
+param enableSoftDelete bool = false
+param userNameValue string = 'domain-admin-username'
+param userName string
+param userPasswordValue string = 'domain-admin-password'
+@secure()
+param userPassword string
+param networkAcls object = {
+  ipRules: []
+  virtualNetworkRules: []
+}
 
 // Identity Params
-param identiyResourceTags object = {
+param identityResourceTags object = {
   Environment: 'Dev'
   Project: 'Tutorial'
   Purpose: 'Identity'
   IaC: 'Bicep💪'
 }
-param rgIdentityLocation string
+param rgIdentityLocation string = 'northeurope'
 param identityAddressSpacePrefix string = '10.0.0.0/24'
 param identityVnetPrefix string = '10.0.0.0/25'
 param vmNamePrefix string = 'dc'
@@ -35,11 +112,11 @@ param domainAdminUserName string
 @secure()
 param domainAdminPassword string
 param site string = 'Default-First-Site-Name'
-param psScriptLocation string = 'https://raw.githubusercontent.com/fskelly/azure-lab/test-branch/scripts/restart-vms/restart-vms.ps1'
+param psScriptLocation string = 'https://raw.githubusercontent.com/fskelly/azure-lab/main/scripts/restart-vms/restart-vms.ps1'
 param bastionSubnetIpPrefix string = '10.0.0.128/27'
 
 // Connectivity Params
-param connectivityRGLocation string
+param connectivityRGLocation string = 'northeurope'
 param connectivityResourceTags object = {
   Environment: 'Dev'
   Project: 'Tutorial'
@@ -53,12 +130,15 @@ param onPremCIDR string = '192.168.1.0/24'
 param gwIP string
 @secure()
 param sharedKey string
-//param identityVnetRG string
-//param identityVnetName string
 param deploySiteToSite bool = true
 
-// Identity Variables
+// VARIABLES
 
+// Keyvault Variables
+var keyVaultRGName = '${namingConvention}-kv-${suffix}'
+var vaultName = substring('${namingConvention}kv${uniqueString(keyVaultRG.id)}',0,23)
+
+// Identity Variables
 var azRegions = [
   'eastus'
   'eastus2'
@@ -71,41 +151,81 @@ var azRegions = [
 var zones = [for i in range(0, count): contains(azRegions, rgIdentityLocation) ? [
   string(i == 0 || i == 3 || i == 6 ? 1 : i == 1 || i == 4 || i == 7 ? 2 : 3)
 ] : []]
-var identityRGName = '${prefix}-${regionShortCode}-id-${suffix}'
-var bastionHostName = '${prefix}-${regionShortCode}-adds-bastion'
+var identityRGName = '${namingConvention}-id-${suffix}'
+var bastionHostName = '${namingConvention}-adds-bastion'
 var bastionSubnetName = 'AzureBastionSubnet'
 var publicIpAddressName = '${bastionHostName}-pip'
 var domainUserName = newForest == true ? '${split(domainFqdn,'.')[0]}\\${adminUsername}' : domainAdminUsername
 var domainPassword = newForest == true ? localAdminPassword : domainAdminPassword
 var domainSite = newForest == true ? 'Default-First-Site-Name' : site
-var identityVnetName = '${prefix}-${regionShortCode}-adds-vnet'
-var avSetName = '${prefix}-${regionShortCode}-adds-avset-1'
-var managedIdentityName = '${prefix}-${regionShortCode}-adds-msi1'
+var identityVnetName = '${namingConvention}-adds-vnet'
+var avSetName = '${namingConvention}-adds-avset-1'
+var managedIdentityName = '${namingConvention}-adds-msi1'
 var fullManagedIdentityID = '/subscriptions/${subID}/resourceGroups/${identityRG.name}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/${managedIdentityName}'
 var domainAdminUsername = '${domainAdminUserName}@${domainFqdn}'
 
 // Connectivity Variables
-
-var connectivityRGName = '${prefix}-${regionShortCode}-connectivity-${suffix}'
-var connectivityVnetName = '${prefix}-${regionShortCode}-con-vnet'
-var vngName = '${prefix}-${regionShortCode}-con-vng'
-//var pipName = '${prefix}-${regionShortCode}-con-pip'
-var dnsName = substring('${prefix}-${regionShortCode}-pip-${uniqueString(connectivityRG.id)}',0, 29)
-var lngName = '${prefix}-${regionShortCode}-con-lng'
-var connectivytPipName = substring('${prefix}-${regionShortCode}-pip-${uniqueString(connectivityRG.id)}',0, 29)
-
+var connectivityRGName = '${namingConvention}-connectivity-${suffix}'
+var connectivityVnetName = '${namingConvention}-con-vnet'
+var vngName = '${namingConvention}-con-vng'
+var dnsName = substring('${namingConvention}-pip-${uniqueString(connectivityRG.id)}',0, 29)
+var lngName = '${namingConvention}-con-lng'
+var connectivytPipName = substring('${namingConvention}-pip-${uniqueString(connectivityRG.id)}',0, 29)
 
 //Create Resource Groups
+resource keyVaultRG 'Microsoft.Resources/resourceGroups@2020-06-01' ={
+  name: keyVaultRGName
+  location: keyVaultRGLocation
+  tags: keyVaultResourceTags
+}
+
 resource identityRG 'Microsoft.Resources/resourceGroups@2020-06-01' = {
   name: identityRGName
   location: rgIdentityLocation
-  tags: identiyResourceTags
+  tags: identityResourceTags
 }
 
 resource connectivityRG 'Microsoft.Resources/resourceGroups@2020-06-01' ={
   name: connectivityRGName
   location: connectivityRGLocation
   tags: connectivityResourceTags
+}
+
+//MODULES
+module keyvault './00-prereqs/keyVault/kv.bicep' = {
+  name: 'deploy-keyvault'
+  scope: keyVaultRG
+  params: {
+    accessPolicies: accessPolicies
+    enabledForDeployment: enabledForDeployment
+    enabledForDiskEncryption: enabledForDiskEncryption
+    enabledForTemplateDeployment: enabledForTemplateDeployment
+    enableRbacAuthorization: enableRbacAuthorization
+    enableSoftDelete: enableSoftDelete
+    location: keyVaultRG.location
+    networkAcls: networkAcls
+    sku: sku
+    softDeleteRetentionInDays: softDeleteRetentionInDays
+    tenantID: tenantID
+    vaultName: vaultName
+  }
+  
+}
+
+module secrets './00-prereqs/keyVault/secrets.bicep' = {
+  name: 'deploy-secrets'
+  scope: keyVaultRG
+  params: {
+    userName: userName
+    userPassword: userPassword
+    vaultName: vaultName
+    userNameValue: userNameValue
+    userPasswordValue: userPasswordValue
+  }
+  dependsOn: [
+    keyvault
+  ]
+  
 }
 
 module addsVnet '01-adds/adModules/vnet.bicep' = {
@@ -117,7 +237,11 @@ module addsVnet '01-adds/adModules/vnet.bicep' = {
     vnetPrefix: identityVnetPrefix
     bastionSubnetName: bastionSubnetName
     bastionSubnetIpPrefix: bastionSubnetIpPrefix
+    nsgName: 'adds-nsg'
   }
+  dependsOn: [
+    secrets
+  ]
 }
 
 module managedIdentity './01-adds/adModules/mi.bicep' = {
@@ -294,22 +418,6 @@ module connection './02-connectivity/s2sModules/connection.bicep' = if (deploySi
   ]
 }
 
-/* module connectivityVnet './peeringModules/connectivityVnet.bicep' = {
-  name: 'get-connectivity-vnet'
-  scope: resourceGroup(rgName)
-  params: {
-
-  }
-} */
-
-/* module identityVnet './02-connectivity/peeringModules/identityVnet.bicep' = {
-  name: 'get-identity-vnet'
-  scope: resourceGroup(identityVnetRG)
-  params: {
-    identityVnetName: identityVnetName
-    identityVnetRG: identityVnetRG
-  }
-} */
 
 module connectivity2idenityPeering './02-connectivity/peeringModules/connectivity2idenityPeering.bicep' = {
   name: 'deploy-connectivity2identitypeering'
@@ -339,12 +447,12 @@ module identity2connectiivtyPeering './02-connectivity/peeringModules/identity2c
 
 //output spokeVnetID string = spokeVnet.outputs.spokeVnetId
 //output connectivityHubVnetID string = hubVnet.outputs.connectivityHubVnetID
-output pipName string = connectivytPipName
+//output pipName string = connectivytPipName
 //output vngPIP string = pip.outputs.pipIP
 //output sharedKey string = sharedKey
-output username string = domainUserName
+//output username string = domainUserName
 output logonName string = '${adminUsername}@${domainFqdn}'
-output identityVnetName string = identityVnetName
+//output identityVnetName string = identityVnetName
 //output vnetID string = connectivityVnetName.outputs.vnetID
-output subnetName string = addsVnet.outputs.subnetName
-output identityRGName string = identityRG.name
+//output subnetName string = addsVnet.outputs.subnetName
+//output identityRGName string = identityRG.name
