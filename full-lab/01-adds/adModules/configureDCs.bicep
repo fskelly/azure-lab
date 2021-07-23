@@ -150,7 +150,7 @@ resource dc2Extension 'Microsoft.Compute/virtualMachines/extensions@2020-12-01' 
         }
         {
           Name: 'newForest'
-          Value: newForest
+          Value: false
           TypeName: 'System.Boolean'
         }
       ]
