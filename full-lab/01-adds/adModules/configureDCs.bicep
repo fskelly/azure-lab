@@ -4,11 +4,8 @@ param resourceTags object = {
   Purpose: 'Identity'
   IaC: 'Bicep💪'
 }
-
 param vmNamePrefix string
-
 param zones array
-
 param location string
 param dscConfigScript string
 param domainUserName string

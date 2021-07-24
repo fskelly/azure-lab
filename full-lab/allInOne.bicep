@@ -1,7 +1,7 @@
 // General Params
 targetScope = 'subscription'
 
-param suffix string = 'blah-1'
+param suffix string = 'blah-3'
 param subID string = '949ef534-07f5-4138-8b79-aae16a71310c'
 param namingConvention string = '${prefix}-${regionShortCode}'
 param prefix string = 'flkelly'
@@ -73,10 +73,10 @@ param enableRbacAuthorization bool = false
 param softDeleteRetentionInDays int = 90
 param enableSoftDelete bool = false
 param userNameValue string = 'domain-admin-username'
-param userName string
+//param userName string
 param userPasswordValue string = 'domain-admin-password'
-@secure()
-param userPassword string
+//@secure()
+//param userPassword string
 param networkAcls object = {
   ipRules: []
   virtualNetworkRules: []
@@ -135,7 +135,7 @@ param deploySiteToSite bool = true
 // VARIABLES
 
 // Keyvault Variables
-var keyVaultRGName = '${namingConvention}-kv-${suffix}'
+var keyVaultRGName = '${namingConvention}-secrets-${suffix}'
 var vaultName = substring('${namingConvention}kv${uniqueString(keyVaultRG.id)}',0,23)
 
 // Identity Variables
@@ -151,7 +151,7 @@ var azRegions = [
 var zones = [for i in range(0, count): contains(azRegions, rgIdentityLocation) ? [
   string(i == 0 || i == 3 || i == 6 ? 1 : i == 1 || i == 4 || i == 7 ? 2 : 3)
 ] : []]
-var identityRGName = '${namingConvention}-id-${suffix}'
+var identityRGName = '${namingConvention}-identity-${suffix}'
 var bastionHostName = '${namingConvention}-adds-bastion'
 var bastionSubnetName = 'AzureBastionSubnet'
 var publicIpAddressName = '${bastionHostName}-pip'
@@ -216,8 +216,8 @@ module secrets './00-prereqs/keyVault/secrets.bicep' = {
   name: 'deploy-secrets'
   scope: keyVaultRG
   params: {
-    userName: userName
-    userPassword: userPassword
+    userName: adminUsername
+    userPassword: domainAdminPassword
     vaultName: vaultName
     userNameValue: userNameValue
     userPasswordValue: userPasswordValue
@@ -225,7 +225,6 @@ module secrets './00-prereqs/keyVault/secrets.bicep' = {
   dependsOn: [
     keyvault
   ]
-  
 }
 
 module addsVnet '01-adds/adModules/vnet.bicep' = {
@@ -417,7 +416,6 @@ module connection './02-connectivity/s2sModules/connection.bicep' = if (deploySi
     vng
   ]
 }
-
 
 module connectivity2idenityPeering './02-connectivity/peeringModules/connectivity2idenityPeering.bicep' = {
   name: 'deploy-connectivity2identitypeering'
