@@ -1,17 +1,18 @@
 // General Params
 targetScope = 'subscription'
 
-param suffix string = 'blah-3'
-param subID string = '949ef534-07f5-4138-8b79-aae16a71310c'
+// you can uncomment suffix and use if needed - I added it to naming convention while i was testing.
+//param suffix string
+param subID string
 param namingConvention string = '${prefix}-${regionShortCode}'
-param prefix string = 'flkelly'
-param regionShortCode string = 'neu'
+param prefix string
+param regionShortCode string
 
 //PARAMETERS
 
 // Keyvault Params
 //var vaultName = substring('${namingConvention}kv${uniqueString(keyVaultRG().)}',0,23) // must be globally unique
-param keyVaultRGLocation string = 'northeurope'
+param keyVaultRGLocation string
 param keyVaultResourceTags object = {
   Environment: 'Dev'
   Project: 'Tutorial'
@@ -19,8 +20,8 @@ param keyVaultResourceTags object = {
   IaC: 'Bicep💪'
 }
 param sku string = 'Standard'
-param objectID string = '4ad6d4e3-4556-4135-979d-bdbd3a63f4ef'
-param tenantID string = '17ca67c9-6ef2-4396-89dd-c8a769cc1991' //replace with your tenantId
+param objectID string       //replace with your objectId
+param tenantID string      //replace with your tenantId
 param accessPolicies array = [
   {
     tenantId: tenantID
@@ -89,7 +90,7 @@ param identityResourceTags object = {
   Purpose: 'Identity'
   IaC: 'Bicep💪'
 }
-param rgIdentityLocation string = 'northeurope'
+param rgIdentityLocation string
 param identityAddressSpacePrefix string = '10.0.0.0/24'
 param identityVnetPrefix string = '10.0.0.0/25'
 param vmNamePrefix string = 'dc'
@@ -116,7 +117,7 @@ param psScriptLocation string = 'https://raw.githubusercontent.com/fskelly/azure
 param bastionSubnetIpPrefix string = '10.0.0.128/27'
 
 // Connectivity Params
-param connectivityRGLocation string = 'northeurope'
+param connectivityRGLocation string
 param connectivityResourceTags object = {
   Environment: 'Dev'
   Project: 'Tutorial'
@@ -135,7 +136,7 @@ param deploySiteToSite bool = true
 // VARIABLES
 
 // Keyvault Variables
-var keyVaultRGName = '${namingConvention}-secrets-${suffix}'
+var keyVaultRGName = '${namingConvention}-secrets'
 var vaultName = substring('${namingConvention}kv${uniqueString(keyVaultRG.id)}',0,23)
 
 // Identity Variables
@@ -151,7 +152,7 @@ var azRegions = [
 var zones = [for i in range(0, count): contains(azRegions, rgIdentityLocation) ? [
   string(i == 0 || i == 3 || i == 6 ? 1 : i == 1 || i == 4 || i == 7 ? 2 : 3)
 ] : []]
-var identityRGName = '${namingConvention}-identity-${suffix}'
+var identityRGName = '${namingConvention}-identity'
 var bastionHostName = '${namingConvention}-adds-bastion'
 var bastionSubnetName = 'AzureBastionSubnet'
 var publicIpAddressName = '${bastionHostName}-pip'
@@ -165,7 +166,7 @@ var fullManagedIdentityID = '/subscriptions/${subID}/resourceGroups/${identityRG
 var domainAdminUsername = '${domainAdminUserName}@${domainFqdn}'
 
 // Connectivity Variables
-var connectivityRGName = '${namingConvention}-connectivity-${suffix}'
+var connectivityRGName = '${namingConvention}-connectivity'
 var connectivityVnetName = '${namingConvention}-con-vnet'
 var vngName = '${namingConvention}-con-vng'
 var dnsName = substring('${namingConvention}-pip-${uniqueString(connectivityRG.id)}',0, 29)
