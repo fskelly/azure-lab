@@ -136,6 +136,8 @@ param gwIP string
 @secure()
 param sharedKey string
 param deploySiteToSite bool = true
+param skuTier string = 'VpnGw1AZ'
+param skuName string = 'VpnGw1AZ'
 
 // VARIABLES
 
@@ -387,6 +389,8 @@ module vng './02-connectivity/p2sModules/vng.bicep' = if(!dryRun) {
     vnetName: connectivityVnetName
     vngName: vngName
     pipName: connectivytPipName
+    skuName: skuName
+    skuTier: skuTier
   }
   dependsOn: [
     pip
@@ -464,7 +468,7 @@ module identity2connectiivtyPeering './02-connectivity/peeringModules/identity2c
 //output sharedKey string = sharedKey
 //output username string = domainUserName
 output logonName string = '${adminUsername}@${domainFqdn}'
-output kvName string = keyvault.name
+output kvName string = keyvault.outputs.keyVaultName
 //output identityVnetName string = identityVnetName
 //output vnetID string = connectivityVnetName.outputs.vnetID
 //output subnetName string = addsVnet.outputs.subnetName

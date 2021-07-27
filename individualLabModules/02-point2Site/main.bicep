@@ -10,6 +10,8 @@ param addressSpacePrefix string = '10.0.0.0/24'
 param vnetPrefix string = '10.0.0.0/25'
 param gwPrefix string = '10.0.0.128/27'
 
+param skuTier string = 'VpnGw1AZ'
+param skuName string = 'VpnGw1AZ'
 
 var rgName = '${prefix}-${regionShortCode}-connectivity'
 var vnetName = '${prefix}-${regionShortCode}-con-vnet'
@@ -44,6 +46,8 @@ module vng './modules/vng.bicep' = {
     vnetName: vnetName
     vngName: vngName
     pipName: pipName
+    skuName: skuName
+    skuTier: skuTier
   }
   dependsOn: [
     pip

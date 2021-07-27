@@ -1,6 +1,6 @@
 param pipName string
 param dnsName string
-param skuName string
+param skuName string = 'Standard'
 
 param resourceTags object = {
   Environment: 'Dev'

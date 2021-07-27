@@ -2,6 +2,8 @@ param vngName string
 param vnetName string
 param gwSubnetName string
 param pipName string
+param skuName string
+param skuTier string
 
 param resourceTags object = {
   Environment: 'Dev'
@@ -29,8 +31,8 @@ resource virtualNetworkGateway 'Microsoft.Network/virtualNetworkGateways@2020-11
       }
     ]
     sku: {
-      name: 'VpnGw1AZ'
-      tier: 'VpnGw1AZ'
+      name: skuName
+      tier: skuTier
     }
     gatewayType: 'Vpn'
     vpnType: 'RouteBased'

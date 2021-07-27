@@ -19,6 +19,9 @@ param identityVnetRG string
 param identityVnetName string
 param deploySiteToSite bool = true
 
+param skuTier string = 'VpnGw1AZ'
+param skuName string = 'VpnGw1AZ'
+
 var connectivityRGName = '${prefix}-${regionShortCode}-connectivity-${suffix}'
 var vnetName = '${prefix}-${regionShortCode}-con-vnet'
 var vngName = '${prefix}-${regionShortCode}-con-vng'
@@ -56,6 +59,8 @@ module vng './p2sModules/vng.bicep' = {
     vnetName: vnetName
     vngName: vngName
     pipName: pipName
+    skuName: skuName
+    skuTier: skuTier
   }
   dependsOn: [
     pip
