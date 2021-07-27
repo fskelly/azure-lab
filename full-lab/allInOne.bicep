@@ -4,9 +4,13 @@ targetScope = 'subscription'
 // you can uncomment suffix and use if needed - I added it to naming convention while i was testing.
 //param suffix string
 param subID string
-param namingConvention string = '${prefix}-${regionShortCode}'
+//param namingConvention string = '${prefix}-${regionShortCode}'
 param prefix string
 param regionShortCode string
+//param suffix string
+
+param dryRun bool = false
+
 
 //PARAMETERS
 
@@ -135,9 +139,15 @@ param deploySiteToSite bool = true
 
 // VARIABLES
 
+//Global
+
+//var namingConvention = testing == 'true' ? '${prefix}-${regionShortCode}-${suffix}' : '${prefix}-${regionShortCode}'
+var namingConvention = '${prefix}-${regionShortCode}'
+
 // Keyvault Variables
 var keyVaultRGName = '${namingConvention}-secrets'
 var vaultName = substring('${namingConvention}kv${uniqueString(keyVaultRG.id)}',0,23)
+//var vaultName = testing == 'true' ? substring('${namingConvention}kv${uniqueString(keyVaultRG.id)}',0,22) : substring('${namingConvention}kv${uniqueString(keyVaultRG.id)}',0,23)
 
 // Identity Variables
 var azRegions = [
@@ -174,26 +184,26 @@ var lngName = '${namingConvention}-con-lng'
 var connectivytPipName = substring('${namingConvention}-pip-${uniqueString(connectivityRG.id)}',0, 29)
 
 //Create Resource Groups
-resource keyVaultRG 'Microsoft.Resources/resourceGroups@2020-06-01' ={
+resource keyVaultRG 'Microsoft.Resources/resourceGroups@2020-06-01' = if(!dryRun){
   name: keyVaultRGName
   location: keyVaultRGLocation
   tags: keyVaultResourceTags
 }
 
-resource identityRG 'Microsoft.Resources/resourceGroups@2020-06-01' = {
+resource identityRG 'Microsoft.Resources/resourceGroups@2020-06-01' = if(!dryRun) {
   name: identityRGName
   location: rgIdentityLocation
   tags: identityResourceTags
 }
 
-resource connectivityRG 'Microsoft.Resources/resourceGroups@2020-06-01' ={
+resource connectivityRG 'Microsoft.Resources/resourceGroups@2020-06-01' = if(!dryRun) {
   name: connectivityRGName
   location: connectivityRGLocation
   tags: connectivityResourceTags
 }
 
 //MODULES
-module keyvault './00-prereqs/keyVault/kv.bicep' = {
+module keyvault './00-prereqs/keyVault/kv.bicep' = if(!dryRun) {
   name: 'deploy-keyvault'
   scope: keyVaultRG
   params: {
@@ -213,7 +223,7 @@ module keyvault './00-prereqs/keyVault/kv.bicep' = {
   
 }
 
-module secrets './00-prereqs/keyVault/secrets.bicep' = {
+module secrets './00-prereqs/keyVault/secrets.bicep' = if(!dryRun) {
   name: 'deploy-secrets'
   scope: keyVaultRG
   params: {
@@ -228,7 +238,7 @@ module secrets './00-prereqs/keyVault/secrets.bicep' = {
   ]
 }
 
-module addsVnet '01-adds/adModules/vnet.bicep' = {
+module addsVnet '01-adds/adModules/vnet.bicep' = if(!dryRun) {
   name: 'deploy-vnet'
   scope: identityRG
   params: {
@@ -244,7 +254,7 @@ module addsVnet '01-adds/adModules/vnet.bicep' = {
   ]
 }
 
-module managedIdentity './01-adds/adModules/mi.bicep' = {
+module managedIdentity './01-adds/adModules/mi.bicep' = if(!dryRun) {
   name: 'deploy-managedIdentity'
   scope: identityRG
   params: {
@@ -253,7 +263,7 @@ module managedIdentity './01-adds/adModules/mi.bicep' = {
   
 }
 
-module avSet './01-adds/adModules/avset.bicep' = {
+module avSet './01-adds/adModules/avset.bicep' = if(!dryRun) {
   name: 'deploy-avset'
   scope: identityRG
   params :{
@@ -261,7 +271,7 @@ module avSet './01-adds/adModules/avset.bicep' = {
   }  
 }
 
-module bastionPublicIp './01-adds/adModules/pip.bicep' = {
+module bastionPublicIp './01-adds/adModules/pip.bicep' = if(!dryRun) {
   name: 'deploy-pip'
   scope: identityRG
   params: {
@@ -271,7 +281,7 @@ module bastionPublicIp './01-adds/adModules/pip.bicep' = {
   }
 }
 
-module bastionHost './01-adds/adModules/bastion.bicep' = {
+module bastionHost './01-adds/adModules/bastion.bicep' = if(!dryRun) {
   name: 'deploy-bastionHost'
   scope: identityRG
   params: {
@@ -289,6 +299,7 @@ module nics './01-adds/adModules/nics.bicep' = [for i in range(0, count): {
   name: '${vmNamePrefix}-${i + 1}-nic'
   scope: identityRG
   params: {
+    dryRun: dryRun
     vmNamePrefix: vmNamePrefix
     vnetID: addsVnet.outputs.vnetID
     //count: count
@@ -298,7 +309,7 @@ module nics './01-adds/adModules/nics.bicep' = [for i in range(0, count): {
   }
 }]
 
-module nicsDns './01-adds/adModules/nicDns.bicep' = {
+module nicsDns './01-adds/adModules/nicDns.bicep' = if(!dryRun) {
   name: 'set-dns-nic'
   scope: identityRG
   params: {
@@ -312,7 +323,7 @@ module nicsDns './01-adds/adModules/nicDns.bicep' = {
   }
 }
 
-module vmProperties './01-adds/adModules/vmPropertiesBuilder.bicep' = {
+module vmProperties './01-adds/adModules/vmPropertiesBuilder.bicep' = if(!dryRun) {
   name: 'deploy-Properties-Builder'
   scope: identityRG
   params: {
@@ -333,7 +344,7 @@ module vmProperties './01-adds/adModules/vmPropertiesBuilder.bicep' = {
   }
 }
 
-module dcConfigurationBuild './01-adds/adModules/configureDCs.bicep' = {
+module dcConfigurationBuild './01-adds/adModules/configureDCs.bicep' = if(!dryRun) {
   name: 'deploy-dcs'
   scope: identityRG
   params: {
@@ -354,7 +365,7 @@ module dcConfigurationBuild './01-adds/adModules/configureDCs.bicep' = {
   
 }
 
-module connectivityVnet './02-connectivity/p2sModules/network.bicep' = {
+module connectivityVnet './02-connectivity/p2sModules/network.bicep' = if(!dryRun) {
   name: 'deploy-connectivity-vnet'
   scope: connectivityRG
   params: {
@@ -368,7 +379,7 @@ module connectivityVnet './02-connectivity/p2sModules/network.bicep' = {
   ]
 }
 
-module vng './02-connectivity/p2sModules/vng.bicep' = {
+module vng './02-connectivity/p2sModules/vng.bicep' = if(!dryRun) {
   name: 'vng-deploy'
   scope: connectivityRG
   params: {
@@ -382,16 +393,18 @@ module vng './02-connectivity/p2sModules/vng.bicep' = {
   ]
 }
 
-module pip './02-connectivity/p2sModules/pip.bicep' = {
+module pip './02-connectivity/p2sModules/pip.bicep' = if(!dryRun) {
   name: 'pip-deploy'
   scope: connectivityRG
   params: {
     pipName: connectivytPipName
     dnsName: dnsName
+    skuName: 'standard'
   }
+
 }
 
-module lng './02-connectivity/s2sModules/lng.bicep' = if (deploySiteToSite == true){
+module lng './02-connectivity/s2sModules/lng.bicep' = if (deploySiteToSite == true && !dryRun){
   name: 'lng-deploy'
   scope: connectivityRG
   params: {
@@ -404,7 +417,7 @@ module lng './02-connectivity/s2sModules/lng.bicep' = if (deploySiteToSite == tr
   ]
 }
 
-module connection './02-connectivity/s2sModules/connection.bicep' = if (deploySiteToSite == true){
+module connection './02-connectivity/s2sModules/connection.bicep' = if (deploySiteToSite == true && !dryRun){
   name: 'deploy-connection'
   scope: connectivityRG
   params: {
@@ -418,7 +431,7 @@ module connection './02-connectivity/s2sModules/connection.bicep' = if (deploySi
   ]
 }
 
-module connectivity2idenityPeering './02-connectivity/peeringModules/connectivity2idenityPeering.bicep' = {
+module connectivity2idenityPeering './02-connectivity/peeringModules/connectivity2idenityPeering.bicep' = if(!dryRun) {
   name: 'deploy-connectivity2identitypeering'
   scope: connectivityRG
   params: {
@@ -431,7 +444,7 @@ module connectivity2idenityPeering './02-connectivity/peeringModules/connectivit
   ]
 } 
 
-module identity2connectiivtyPeering './02-connectivity/peeringModules/identity2connectivityPeering.bicep' = {
+module identity2connectiivtyPeering './02-connectivity/peeringModules/identity2connectivityPeering.bicep' = if(!dryRun) {
   name: 'spoke2ConnectivityHubPeering'
   scope: identityRG
   params: {
@@ -451,6 +464,7 @@ module identity2connectiivtyPeering './02-connectivity/peeringModules/identity2c
 //output sharedKey string = sharedKey
 //output username string = domainUserName
 output logonName string = '${adminUsername}@${domainFqdn}'
+output kvName string = keyvault.name
 //output identityVnetName string = identityVnetName
 //output vnetID string = connectivityVnetName.outputs.vnetID
 //output subnetName string = addsVnet.outputs.subnetName

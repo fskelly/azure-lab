@@ -1,5 +1,6 @@
 param pipName string
 param dnsName string
+param skuName string
 
 param resourceTags object = {
   Environment: 'Dev'
@@ -9,10 +10,13 @@ param resourceTags object = {
 
 resource publicIPAddress 'Microsoft.Network/publicIPAddresses@2019-11-01' = {
   name: pipName
+  sku: {
+    name: skuName
+  }
   tags: resourceTags
   location: resourceGroup().location
   properties: {
-    publicIPAllocationMethod: 'Dynamic'
+    publicIPAllocationMethod: 'Static'
     dnsSettings: {
       domainNameLabel: dnsName
     }
