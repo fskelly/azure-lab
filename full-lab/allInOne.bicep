@@ -10,9 +10,9 @@ param regionShortCode string
 
 // Deployment Params - which components do you want to deploy?
 param dryRun bool = false // run a test script
-param deployIdentity bool = false // do you want to deploy identity?
-param deployKeyVault bool = false
-param deployConnectivity bool = false
+param deployIdentity bool = true // do you want to deploy identity?
+param deployKeyVault bool = true // do you want to deploy keyvault?
+param deployConnectivity bool = false // do you want to deploy connectivity?
 
 //PARAMETERS
 
@@ -100,6 +100,7 @@ param rgIdentityLocation string
 param identityAddressSpacePrefix string = '10.0.0.0/24'
 param identityVnetPrefix string = '10.0.0.0/25'
 param vmNamePrefix string = 'dc'
+param dcNamePrefix string = '${regionShortCode}-ad-vm'
 param dnsServers array = [
   '168.63.129.16'
 ]
@@ -149,7 +150,7 @@ param skuName string = 'VpnGw1AZ'
 var namingConvention = '${prefix}-${regionShortCode}'
 
 // Keyvault Variables
-var keyVaultRGName = 'rg-${namingConvention}-secrets'
+var keyVaultRGName = '${namingConvention}-secrets'
 var vaultName = substring('${namingConvention}kv${uniqueString(keyVaultRG.id)}',0,23)
 //var vaultName = testing == 'true' ? substring('${namingConvention}kv${uniqueString(keyVaultRG.id)}',0,22) : substring('${namingConvention}kv${uniqueString(keyVaultRG.id)}',0,23)
 
@@ -166,7 +167,7 @@ var azRegions = [
 var zones = [for i in range(0, count): contains(azRegions, rgIdentityLocation) ? [
   string(i == 0 || i == 3 || i == 6 ? 1 : i == 1 || i == 4 || i == 7 ? 2 : 3)
 ] : []]
-var identityRGName = 'rg-${namingConvention}-identity'
+var identityRGName = '${namingConvention}-identity'
 var bastionHostName = '${namingConvention}-adds-bastion'
 var bastionSubnetName = 'AzureBastionSubnet'
 var publicIpAddressName = '${bastionHostName}-pip'
@@ -180,7 +181,7 @@ var fullManagedIdentityID = '/subscriptions/${subID}/resourceGroups/${identityRG
 var domainAdminUsername = '${domainAdminUserName}@${domainFqdn}'
 
 // Connectivity Variables
-var connectivityRGName = 'rg-${namingConvention}-connectivity'
+var connectivityRGName = '${namingConvention}-connectivity'
 var connectivityVnetName = '${namingConvention}-con-vnet'
 var vngName = '${namingConvention}-con-vng'
 var dnsName = substring('${namingConvention}-pip-${uniqueString(connectivityRG.id)}',0, 29)
@@ -305,12 +306,14 @@ module bastionHost './01-adds/adModules/bastion.bicep' = if(!dryRun  && deployId
 }
 
 module nics './01-adds/adModules/nics.bicep' = [for i in range(0, count): {
-  name: '${vmNamePrefix}-${i + 1}-nic'
+  //name: '${vmNamePrefix}-${i + 1}-nic'
+  name: '${dcNamePrefix}-${i + 1}-nic'
   scope: identityRG
   params: {
     dryRun: dryRun
     deployIdentity: deployIdentity
-    vmNamePrefix: vmNamePrefix
+    //vmNamePrefix: vmNamePrefix
+    vmNamePrefix: dcNamePrefix
     vnetID: addsVnet.outputs.vnetID
     //count: count
     i: i
@@ -347,7 +350,8 @@ module vmProperties './01-adds/adModules/vmPropertiesBuilder.bicep' = if(!dryRun
     ntdsSizeGB: ntdsSizeGB
     sysVolSizeGB: sysVolSizeGB
     timeZoneId: timeZoneId
-    vmNamePrefix: vmNamePrefix
+    //vmNamePrefix: vmNamePrefix
+    vmNamePrefix: dcNamePrefix
     vmSize: vmSize
     zones: zones[0]
   }
@@ -366,7 +370,8 @@ module dcConfigurationBuild './01-adds/adModules/configureDCs.bicep' = if(!dryRu
     location: rgIdentityLocation
     newForest: newForest
     psScriptLocation: psScriptLocation
-    vmNamePrefix: vmNamePrefix
+    //vmNamePrefix: vmNamePrefix
+    vmNamePrefix: dcNamePrefix
     zones: zones
     dc1Properties: vmProperties.outputs.vmProperties[0]
     dc2Properties: vmProperties.outputs.vmProperties[1]
