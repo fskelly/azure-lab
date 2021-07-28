@@ -4,11 +4,8 @@ param resourceTags object = {
   Purpose: 'Identity'
   IaC: 'Bicep💪'
 }
-
 param vmNamePrefix string
-
 param zones array
-
 param location string
 param dscConfigScript string
 param domainUserName string
@@ -150,7 +147,7 @@ resource dc2Extension 'Microsoft.Compute/virtualMachines/extensions@2020-12-01' 
         }
         {
           Name: 'newForest'
-          Value: newForest
+          Value: false
           TypeName: 'System.Boolean'
         }
       ]

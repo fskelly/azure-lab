@@ -2,7 +2,7 @@ param prefix string
 param regionShortCode string
 //param rgName string
 
-param namingConvention string = '${prefix}${regionShortCode}kv'
+param namingConvention string = '${prefix}${regionShortCode}'
 param vaultName string = substring('f-${namingConvention}kv${uniqueString(resourceGroup().id)}',0,23) // must be globally unique
 param location string = resourceGroup().location
 param sku string = 'Standard'

@@ -1,5 +1,6 @@
 param prefix string
-param rgLocation string
+param suffix string
+param connectivityRGLocation string
 param regionShortCode string
 param resourceTags object = {
   Environment: 'Dev'
@@ -16,25 +17,29 @@ param gwIP string
 param sharedKey string
 param identityVnetRG string
 param identityVnetName string
+param deploySiteToSite bool = true
 
-var rgName = '${prefix}-${regionShortCode}-connectivity-1'
+param skuTier string = 'VpnGw1AZ'
+param skuName string = 'VpnGw1AZ'
+
+var connectivityRGName = '${prefix}-${regionShortCode}-connectivity-${suffix}'
 var vnetName = '${prefix}-${regionShortCode}-con-vnet'
 var vngName = '${prefix}-${regionShortCode}-con-vng'
 //var pipName = '${prefix}-${regionShortCode}-con-pip'
-var dnsName = substring('${prefix}-${regionShortCode}-pip-${uniqueString(rg.id)}',0, 29)
+var dnsName = substring('${prefix}-${regionShortCode}-pip-${uniqueString(connectivityRG.id)}',0, 29)
 var lngName = '${prefix}-${regionShortCode}-con-lng'
-var pipName = substring('${prefix}-${regionShortCode}-pip-${uniqueString(rg.id)}',0, 29)
+var pipName = substring('${prefix}-${regionShortCode}-pip-${uniqueString(connectivityRG.id)}',0, 29)
 
 targetScope = 'subscription'
-resource rg 'Microsoft.Resources/resourceGroups@2020-06-01' ={
-  name: rgName
-  location: rgLocation
+resource connectivityRG 'Microsoft.Resources/resourceGroups@2020-06-01' ={
+  name: connectivityRGName
+  location: connectivityRGLocation
   tags: resourceTags
 }
 
 module vnet './p2sModules/network.bicep' = {
   name: 'vnet-deploy'
-  scope: rg
+  scope: connectivityRG
   params: {
     vnetName: vnetName
     addressSpacePrefix: addressSpacePrefix
@@ -42,18 +47,20 @@ module vnet './p2sModules/network.bicep' = {
     gwPrefix: gwPrefix
   }
   dependsOn: [
-    rg
+    connectivityRG
   ]
 }
 
 module vng './p2sModules/vng.bicep' = {
   name: 'vng-deploy'
-  scope: rg
+  scope: connectivityRG
   params: {
     gwSubnetName: 'gatewaySubnet'
     vnetName: vnetName
     vngName: vngName
     pipName: pipName
+    skuName: skuName
+    skuTier: skuTier
   }
   dependsOn: [
     pip
@@ -62,16 +69,16 @@ module vng './p2sModules/vng.bicep' = {
 
 module pip './p2sModules/pip.bicep' = {
   name: 'pip-deploy'
-  scope: rg
+  scope: connectivityRG
   params: {
     pipName: pipName
     dnsName: dnsName
   }
 }
 
-module lng './s2sModules/lng.bicep' = {
+module lng './s2sModules/lng.bicep' = if (deploySiteToSite == true){
   name: 'lng-deploy'
-  scope: resourceGroup(rgName)
+  scope: connectivityRG
   params: {
     lngName: lngName
     onPremCIDR: onPremCIDR
@@ -82,9 +89,9 @@ module lng './s2sModules/lng.bicep' = {
   ]
 }
 
-module connection 's2sModules/connection.bicep' = {
+module connection 's2sModules/connection.bicep' = if (deploySiteToSite == true){
   name: 'deploy-connection'
-  scope: resourceGroup(rgName)
+  scope: connectivityRG
   params: {
     connectionName: 'azure-to-home'
     lngName: lngName
@@ -115,7 +122,7 @@ module identityVnet './peeringModules/identityVnet.bicep' = {
 
 module connectivity2idenityPeering './peeringModules/connectivity2idenityPeering.bicep' = {
   name: 'deploy-connectivity2identitypeering'
-  scope: resourceGroup(rgName)
+  scope: connectivityRG
   params: {
     connectivityVnetName: vnetName
     identityVnetID: identityVnet.outputs.idenityVnetId

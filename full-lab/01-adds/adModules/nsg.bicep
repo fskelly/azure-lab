@@ -1,49 +1,5 @@
-param resourceTags object = {
-  Environment: 'Dev'
-  Project: 'Tutorial'
-  Purpose: 'Identity'
-}
-
-// Param Section
-param vnetName string
-param addressSpacePrefix string
-param vnetPrefix string
-param vnetLocation string = resourceGroup().location
-param bastionSubnetName string
-param bastionSubnetIpPrefix string
-param nsgName string
-
-// VNET 
-resource vnet 'Microsoft.Network/virtualNetworks@2020-06-01' = {
-  name: vnetName
-  tags: resourceTags
-  location: vnetLocation
-  properties: {
-    addressSpace: {
-      addressPrefixes: [
-        addressSpacePrefix
-      ]
-    }
-    subnets: [
-      {
-        name: 'ADDS-Subnet'
-        properties: {
-          addressPrefix: vnetPrefix
-          networkSecurityGroup: {
-            id: networkSecurityGroupADDS.id
-          }
-        }
-      }
-      {
-        name: bastionSubnetName
-        properties: {
-          addressPrefix: bastionSubnetIpPrefix
-        }
-      }
-    ]
-  }
-}
-
+param nsgName string = 'ad-nsg'
+param adVnetCidr string
 
 resource networkSecurityGroupADDS 'Microsoft.Network/networkSecurityGroups@2019-11-01' = {
   name: nsgName
@@ -58,7 +14,7 @@ resource networkSecurityGroupADDS 'Microsoft.Network/networkSecurityGroups@2019-
           sourcePortRange: '*'
           destinationPortRange: '3389'
           sourceAddressPrefix: 'VirtualNetwork'
-          destinationAddressPrefix: vnetPrefix
+          destinationAddressPrefix: adVnetCidr
           access: 'Allow'
           priority: 120
           direction: 'Inbound'
@@ -72,7 +28,7 @@ resource networkSecurityGroupADDS 'Microsoft.Network/networkSecurityGroups@2019-
           sourcePortRange: '*'
           destinationPortRange: '25'
           sourceAddressPrefix: 'VirtualNetwork'
-          destinationAddressPrefix: vnetPrefix
+          destinationAddressPrefix: adVnetCidr
           access: 'Allow'
           priority: 121
           direction: 'Inbound'
@@ -86,7 +42,7 @@ resource networkSecurityGroupADDS 'Microsoft.Network/networkSecurityGroups@2019-
           sourcePortRange: '*'
           destinationPortRange: '42'
           sourceAddressPrefix: 'VirtualNetwork'
-          destinationAddressPrefix: vnetPrefix
+          destinationAddressPrefix: adVnetCidr
           access: 'Allow'
           priority: 122
           direction: 'Inbound'
@@ -100,7 +56,7 @@ resource networkSecurityGroupADDS 'Microsoft.Network/networkSecurityGroups@2019-
           sourcePortRange: '*'
           destinationPortRange: '135'
           sourceAddressPrefix: 'VirtualNetwork'
-          destinationAddressPrefix: vnetPrefix
+          destinationAddressPrefix: adVnetCidr
           access: 'Allow'
           priority: 123
           direction: 'Inbound'
@@ -114,7 +70,7 @@ resource networkSecurityGroupADDS 'Microsoft.Network/networkSecurityGroups@2019-
           sourcePortRange: '*'
           destinationPortRange: '137'
           sourceAddressPrefix: 'VirtualNetwork'
-          destinationAddressPrefix: vnetPrefix
+          destinationAddressPrefix: adVnetCidr
           access: 'Allow'
           priority: 124
           direction: 'Inbound'
@@ -128,7 +84,7 @@ resource networkSecurityGroupADDS 'Microsoft.Network/networkSecurityGroups@2019-
           sourcePortRange: '*'
           destinationPortRange: '139'
           sourceAddressPrefix: 'VirtualNetwork'
-          destinationAddressPrefix: vnetPrefix
+          destinationAddressPrefix: adVnetCidr
           access: 'Allow'
           priority: 125
           direction: 'Inbound'
@@ -142,7 +98,7 @@ resource networkSecurityGroupADDS 'Microsoft.Network/networkSecurityGroups@2019-
           sourcePortRange: '*'
           destinationPortRange: '389'
           sourceAddressPrefix: 'VirtualNetwork'
-          destinationAddressPrefix: vnetPrefix
+          destinationAddressPrefix: adVnetCidr
           access: 'Allow'
           priority: 126
           direction: 'Inbound'
@@ -156,7 +112,7 @@ resource networkSecurityGroupADDS 'Microsoft.Network/networkSecurityGroups@2019-
           sourcePortRange: '*'
           destinationPortRange: '389'
           sourceAddressPrefix: 'VirtualNetwork'
-          destinationAddressPrefix: vnetPrefix
+          destinationAddressPrefix: adVnetCidr
           access: 'Allow'
           priority: 127
           direction: 'Inbound'
@@ -170,7 +126,7 @@ resource networkSecurityGroupADDS 'Microsoft.Network/networkSecurityGroups@2019-
           sourcePortRange: '*'
           destinationPortRange: '636'
           sourceAddressPrefix: 'VirtualNetwork'
-          destinationAddressPrefix: vnetPrefix
+          destinationAddressPrefix: adVnetCidr
           access: 'Allow'
           priority: 128
           direction: 'Inbound'
@@ -184,7 +140,7 @@ resource networkSecurityGroupADDS 'Microsoft.Network/networkSecurityGroups@2019-
           sourcePortRange: '*'
           destinationPortRange: '3268-3269'
           sourceAddressPrefix: 'VirtualNetwork'
-          destinationAddressPrefix: vnetPrefix
+          destinationAddressPrefix: adVnetCidr
           access: 'Allow'
           priority: 129
           direction: 'Inbound'
@@ -198,7 +154,7 @@ resource networkSecurityGroupADDS 'Microsoft.Network/networkSecurityGroups@2019-
           sourcePortRange: '*'
           destinationPortRange: '88'
           sourceAddressPrefix: 'VirtualNetwork'
-          destinationAddressPrefix: vnetPrefix
+          destinationAddressPrefix: adVnetCidr
           access: 'Allow'
           priority: 130
           direction: 'Inbound'
@@ -212,7 +168,7 @@ resource networkSecurityGroupADDS 'Microsoft.Network/networkSecurityGroups@2019-
           sourcePortRange: '*'
           destinationPortRange: '88'
           sourceAddressPrefix: 'VirtualNetwork'
-          destinationAddressPrefix: vnetPrefix
+          destinationAddressPrefix: adVnetCidr
           access: 'Allow'
           priority: 131
           direction: 'Inbound'
@@ -226,7 +182,7 @@ resource networkSecurityGroupADDS 'Microsoft.Network/networkSecurityGroups@2019-
           sourcePortRange: '*'
           destinationPortRange: '53'
           sourceAddressPrefix: 'VirtualNetwork'
-          destinationAddressPrefix: vnetPrefix
+          destinationAddressPrefix: adVnetCidr
           access: 'Allow'
           priority: 132
           direction: 'Inbound'
@@ -240,7 +196,7 @@ resource networkSecurityGroupADDS 'Microsoft.Network/networkSecurityGroups@2019-
           sourcePortRange: '*'
           destinationPortRange: '53'
           sourceAddressPrefix: 'VirtualNetwork'
-          destinationAddressPrefix: vnetPrefix
+          destinationAddressPrefix: adVnetCidr
           access: 'Allow'
           priority: 133
           direction: 'Inbound'
@@ -254,7 +210,7 @@ resource networkSecurityGroupADDS 'Microsoft.Network/networkSecurityGroups@2019-
           sourcePortRange: '*'
           destinationPortRange: '445'
           sourceAddressPrefix: 'VirtualNetwork'
-          destinationAddressPrefix: vnetPrefix
+          destinationAddressPrefix: adVnetCidr
           access: 'Allow'
           priority: 134
           direction: 'Inbound'
@@ -268,7 +224,7 @@ resource networkSecurityGroupADDS 'Microsoft.Network/networkSecurityGroups@2019-
           sourcePortRange: '*'
           destinationPortRange: '445'
           sourceAddressPrefix: 'VirtualNetwork'
-          destinationAddressPrefix: vnetPrefix
+          destinationAddressPrefix: adVnetCidr
           access: 'Allow'
           priority: 135
           direction: 'Inbound'
@@ -282,7 +238,7 @@ resource networkSecurityGroupADDS 'Microsoft.Network/networkSecurityGroups@2019-
           sourcePortRange: '*'
           destinationPortRange: '9389'
           sourceAddressPrefix: 'VirtualNetwork'
-          destinationAddressPrefix: vnetPrefix
+          destinationAddressPrefix: adVnetCidr
           access: 'Allow'
           priority: 136
           direction: 'Inbound'
@@ -296,7 +252,7 @@ resource networkSecurityGroupADDS 'Microsoft.Network/networkSecurityGroups@2019-
           sourcePortRange: '*'
           destinationPortRange: '5722'
           sourceAddressPrefix: 'VirtualNetwork'
-          destinationAddressPrefix: vnetPrefix
+          destinationAddressPrefix: adVnetCidr
           access: 'Allow'
           priority: 137
           direction: 'Inbound'
@@ -310,7 +266,7 @@ resource networkSecurityGroupADDS 'Microsoft.Network/networkSecurityGroups@2019-
           sourcePortRange: '*'
           destinationPortRange: '464'
           sourceAddressPrefix: 'VirtualNetwork'
-          destinationAddressPrefix: vnetPrefix
+          destinationAddressPrefix: adVnetCidr
           access: 'Allow'
           priority: 138
           direction: 'Inbound'
@@ -324,7 +280,7 @@ resource networkSecurityGroupADDS 'Microsoft.Network/networkSecurityGroups@2019-
           sourcePortRange: '*'
           destinationPortRange: '464'
           sourceAddressPrefix: 'VirtualNetwork'
-          destinationAddressPrefix: vnetPrefix
+          destinationAddressPrefix: adVnetCidr
           access: 'Allow'
           priority: 139
           direction: 'Inbound'
@@ -338,7 +294,7 @@ resource networkSecurityGroupADDS 'Microsoft.Network/networkSecurityGroups@2019-
           sourcePortRange: '*'
           destinationPortRange: '123'
           sourceAddressPrefix: 'VirtualNetwork'
-          destinationAddressPrefix: vnetPrefix
+          destinationAddressPrefix: adVnetCidr
           access: 'Allow'
           priority: 140
           direction: 'Inbound'
@@ -352,7 +308,7 @@ resource networkSecurityGroupADDS 'Microsoft.Network/networkSecurityGroups@2019-
           sourcePortRange: '*'
           destinationPortRange: '137-138'
           sourceAddressPrefix: 'VirtualNetwork'
-          destinationAddressPrefix: vnetPrefix
+          destinationAddressPrefix: adVnetCidr
           access: 'Allow'
           priority: 141
           direction: 'Inbound'
@@ -366,7 +322,7 @@ resource networkSecurityGroupADDS 'Microsoft.Network/networkSecurityGroups@2019-
           sourcePortRange: '*'
           destinationPortRange: '49152-65535'
           sourceAddressPrefix: 'VirtualNetwork'
-          destinationAddressPrefix: vnetPrefix
+          destinationAddressPrefix: adVnetCidr
           access: 'Allow'
           priority: 142
           direction: 'Inbound'
@@ -380,7 +336,7 @@ resource networkSecurityGroupADDS 'Microsoft.Network/networkSecurityGroups@2019-
           sourcePortRange: '*'
           destinationPortRange: '49152-65535'
           sourceAddressPrefix: 'VirtualNetwork'
-          destinationAddressPrefix: vnetPrefix
+          destinationAddressPrefix: adVnetCidr
           access: 'Allow'
           priority: 143
           direction: 'Inbound'
@@ -394,7 +350,7 @@ resource networkSecurityGroupADDS 'Microsoft.Network/networkSecurityGroups@2019-
           sourcePortRange: '*'
           destinationPortRange: '*'
           sourceAddressPrefix: 'VirtualNetwork'
-          destinationAddressPrefix: vnetPrefix
+          destinationAddressPrefix: adVnetCidr
           access: 'Deny'
           priority: 200
           direction: 'Inbound'
@@ -408,7 +364,7 @@ resource networkSecurityGroupADDS 'Microsoft.Network/networkSecurityGroups@2019-
           sourcePortRange: '*'
           destinationPortRange: '*'
           sourceAddressPrefix: 'VirtualNetwork'
-          destinationAddressPrefix: vnetPrefix
+          destinationAddressPrefix: adVnetCidr
           access: 'Deny'
           priority: 201
           direction: 'Inbound'
@@ -417,8 +373,3 @@ resource networkSecurityGroupADDS 'Microsoft.Network/networkSecurityGroups@2019-
     ]
   }
 }
-
-
-output vnetID string = vnet.id
-output subnetName string = vnet.properties.subnets[0].name
-output bastionSubnetID string = vnet.properties.subnets[1].id
