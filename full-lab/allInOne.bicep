@@ -6,7 +6,6 @@ targetScope = 'subscription'
 param subID string
 //param namingConvention string = '${prefix}-${regionShortCode}'
 param prefix string
-param regionShortCode string
 
 // Deployment Params - which components do you want to deploy?
 param dryRun bool = false // run a test script?
@@ -17,7 +16,6 @@ param deployConnectivity bool = true // do you want to deploy connectivity?
 //PARAMETERS
 
 // Keyvault Params
-//var vaultName = substring('${namingConvention}kv${uniqueString(keyVaultRG().)}',0,23) // must be globally unique
 param keyVaultRGLocation string
 param keyVaultResourceTags object = {
   Environment: 'Dev'
@@ -93,10 +91,9 @@ param identityResourceTags object = {
   Purpose: 'Identity'
   IaC: 'Bicep💪'
 }
-param rgIdentityLocation string
+param identityRGLocation string
 param identityAddressSpacePrefix string = '10.0.0.0/24'
 param identityVnetPrefix string = '10.0.0.0/25'
-param dcNamePrefix string = '${regionShortCode}-ad-vm'
 param dnsServers array = [
   '168.63.129.16'
 ]
@@ -142,11 +139,18 @@ param skuName string = 'VpnGw1AZ'
 
 //Global
 
-var namingConvention = '${prefix}-${regionShortCode}'
+//var namingConvention = '${prefix}-${regionShortCode}'
 
 // Keyvault Variables
-var keyVaultRGName = '${namingConvention}-secrets'
-var vaultName = substring('${namingConvention}kv${uniqueString(keyVaultRG.id)}',0,23)
+var keyVaultRGName = '${prefix}-secret'
+//var keyVaultRGName = '${namingConvention}-secrets'
+//regionShortName
+
+// Leaving in place so this variable can be used instead
+//var vaultName = substring('${namingConvention}kv${uniqueString(keyVaultRG.id)}',0,23)
+//var vaultName = substring('${prefix}-${keyVaultShortCode.outputs.regionShortName}kv${uniqueString(keyVaultRG.id)}',0,23)
+var vaultName = substring('${prefix}-${keyVaultShortCode.outputs.regionShortName}kv${uniqueString(keyVaultRG.id)}',0,22)
+//var vaultName = substring('${namingConvention}kv${uniqueString(keyVaultRG.id)}',0,23)
 
 // Identity Variables
 var azRegions = [
@@ -158,29 +162,34 @@ var azRegions = [
   'westus2'
   'westus3'
 ]
-var zones = [for i in range(0, count): contains(azRegions, rgIdentityLocation) ? [
+var zones = [for i in range(0, count): contains(azRegions, identityRGLocation) ? [
   string(i == 0 || i == 3 || i == 6 ? 1 : i == 1 || i == 4 || i == 7 ? 2 : 3)
 ] : []]
-var identityRGName = '${namingConvention}-identity'
-var bastionHostName = '${namingConvention}-adds-bastion'
+var identityRGName = '${prefix}-identity'
+
+// Some original names left as samples 
+
+//var bastionHostName = '${namingConvention}-adds-bastion'
+var bastionHostName = '${prefix}-${idShortCode.outputs.regionShortName}-adds-bastion'
 var bastionSubnetName = 'AzureBastionSubnet'
 var publicIpAddressName = '${bastionHostName}-pip'
 var domainUserName = newForest == true ? '${split(domainFqdn,'.')[0]}\\${adminUsername}' : domainAdminUsername
 var domainPassword = newForest == true ? localAdminPassword : domainAdminPassword
 var domainSite = newForest == true ? 'Default-First-Site-Name' : site
-var identityVnetName = '${namingConvention}-adds-vnet'
-var avSetName = '${namingConvention}-adds-avset-1'
-var managedIdentityName = '${namingConvention}-adds-msi1'
+var identityVnetName = '${prefix}-${idShortCode.outputs.regionShortName}-adds-vnet'
+var avSetName = '${prefix}-${idShortCode.outputs.regionShortName}-adds-avset-1'
+var managedIdentityName = '${prefix}-${idShortCode.outputs.regionShortName}-adds-msi1'
 var fullManagedIdentityID = '/subscriptions/${subID}/resourceGroups/${identityRG.name}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/${managedIdentityName}'
 var domainAdminUsername = '${domainAdminUserName}@${domainFqdn}'
+var dcNamePrefix = '${idShortCode.outputs.regionShortName}-ad-vm'
 
 // Connectivity Variables
-var connectivityRGName = '${namingConvention}-connectivity'
-var connectivityVnetName = '${namingConvention}-con-vnet'
-var vngName = '${namingConvention}-con-vng'
-var dnsName = substring('${namingConvention}-pip-${uniqueString(connectivityRG.id)}',0, 29)
-var lngName = '${namingConvention}-con-lng'
-var connectivytPipName = substring('${namingConvention}-pip-${uniqueString(connectivityRG.id)}',0, 29)
+var connectivityRGName = '${prefix}-connectivity'
+var connectivityVnetName = '${prefix}-${conShortCode.outputs.regionShortName}-con-vnet'
+var vngName = '${prefix}-${conShortCode.outputs.regionShortName}-con-vng'
+var dnsName = substring('${prefix}-${conShortCode.outputs.regionShortName}-pip-${uniqueString(connectivityRG.id)}',0, 29)
+var lngName = '${prefix}-${conShortCode.outputs.regionShortName}-con-lng'
+var connectivytPipName = substring('${prefix}-${conShortCode.outputs.regionShortName}-pip-${uniqueString(connectivityRG.id)}',0, 29)
 var useRemoteGateways = (deploySiteToSite == true ? true : false)
 
 //Create Resource Groups
@@ -192,7 +201,7 @@ resource keyVaultRG 'Microsoft.Resources/resourceGroups@2020-06-01' = if(!dryRun
 
 resource identityRG 'Microsoft.Resources/resourceGroups@2020-06-01' = if(!dryRun  && deployIdentity) {
   name: identityRGName
-  location: rgIdentityLocation
+  location: identityRGLocation
   tags: identityResourceTags
 }
 
@@ -205,6 +214,30 @@ resource connectivityRG 'Microsoft.Resources/resourceGroups@2020-06-01' = if(!dr
 //MODULES
 
 //KEYVAULT MODULES
+
+module keyVaultShortCode './tools/regionShortCode.bicep' = if(!dryRun && deployKeyVault) {
+  name: 'get-keyvault-shortcode'
+  scope: keyVaultRG
+  params: {
+    region: keyVaultRGLocation
+  }
+}
+
+module idShortCode './tools/regionShortCode.bicep' = if(!dryRun && deployIdentity) {
+  name: 'get-id-shortcode'
+  scope: identityRG
+  params: {
+    region: identityRGLocation
+  }
+}
+
+module conShortCode './tools/regionShortCode.bicep' = if(!dryRun && deployConnectivity) {
+  name: 'get-con-shortcode'
+  scope: connectivityRG
+  params: {
+    region: connectivityRGLocation
+  }
+}
 
 module keyvault './00-prereqs/keyVault/kv.bicep' = if(!dryRun && deployKeyVault) {
   name: 'deploy-keyvault'
@@ -232,7 +265,7 @@ module secrets './00-prereqs/keyVault/secrets.bicep' = if(!dryRun && deployKeyVa
   params: {
     userName: adminUsername
     userPassword: domainAdminPassword
-    vaultName: vaultName
+    vaultName: keyvault.outputs.keyVaultName
     userNameValue: userNameValue
     userPasswordValue: userPasswordValue
   }
@@ -280,7 +313,7 @@ module bastionPublicIp './01-adds/adModules/pip.bicep' = if(!dryRun  && deployId
   name: 'deploy-pip'
   scope: identityRG
   params: {
-    location: rgIdentityLocation
+    location: identityRGLocation
     publicIpAddressName: publicIpAddressName
 
   }
@@ -292,7 +325,7 @@ module bastionHost './01-adds/adModules/bastion.bicep' = if(!dryRun  && deployId
   params: {
     bastionHostName: bastionHostName
     bastionSubnetID: addsVnet.outputs.bastionSubnetID
-    location: rgIdentityLocation
+    location: identityRGLocation
     publicIpID: bastionPublicIp.outputs.publicIpID
   }
   dependsOn: [
@@ -301,15 +334,17 @@ module bastionHost './01-adds/adModules/bastion.bicep' = if(!dryRun  && deployId
 }
 
 module nics './01-adds/adModules/nics.bicep' = [for i in range(0, count): {
-  name: '${dcNamePrefix}-${i + 1}-nic'
+  name: 'ad-${i + 1}-nic'
   scope: identityRG
   params: {
     dryRun: dryRun
     deployIdentity: deployIdentity
-    vmNamePrefix: dcNamePrefix
+    //vmNamePrefix: dcNamePrefix
     vnetID: addsVnet.outputs.vnetID
     i: i
     subnetName: addsVnet.outputs.subnetName
+    shortCode: idShortCode.outputs.regionShortName
+    prefix: prefix
   }
 }]
 
@@ -323,7 +358,7 @@ module nicsDns './01-adds/adModules/nicDns.bicep' = if(!dryRun  && deployIdentit
       ipConfigurations: nics[i].outputs.ipConfiguration
     }]
     count: count
-    location: rgIdentityLocation
+    location: identityRGLocation
   }
 }
 
@@ -358,7 +393,7 @@ module dcConfigurationBuild './01-adds/adModules/configureDCs.bicep' = if(!dryRu
     domainUserName: domainUserName
     dscConfigScript: dscConfigScript
     fullManagedIdentityID: fullManagedIdentityID
-    location: rgIdentityLocation
+    location: identityRGLocation
     newForest: newForest
     psScriptLocation: psScriptLocation
     vmNamePrefix: dcNamePrefix
@@ -474,6 +509,7 @@ module identity2connectiivtyPeering './02-connectivity/peeringModules/identity2c
 //output username string = domainUserName
 output logonName string = '${adminUsername}@${domainFqdn}'
 output kvName string = keyvault.outputs.keyVaultName
+output EndVaultName string = vaultName
 //output identityVnetName string = identityVnetName
 //output vnetID string = connectivityVnetName.outputs.vnetID
 //output subnetName string = addsVnet.outputs.subnetName
