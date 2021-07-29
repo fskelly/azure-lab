@@ -9,10 +9,10 @@ param prefix string
 param regionShortCode string
 
 // Deployment Params - which components do you want to deploy?
-param dryRun bool = false // run a test script
+param dryRun bool = false // run a test script?
 param deployIdentity bool = true // do you want to deploy identity?
 param deployKeyVault bool = true // do you want to deploy keyvault?
-param deployConnectivity bool = false // do you want to deploy connectivity?
+param deployConnectivity bool = true // do you want to deploy connectivity?
 
 //PARAMETERS
 
@@ -80,10 +80,7 @@ param enableRbacAuthorization bool = false
 param softDeleteRetentionInDays int = 90
 param enableSoftDelete bool = false
 param userNameValue string = 'domain-admin-username'
-//param userName string
 param userPasswordValue string = 'domain-admin-password'
-//@secure()
-//param userPassword string
 param networkAcls object = {
   ipRules: []
   virtualNetworkRules: []
@@ -99,7 +96,6 @@ param identityResourceTags object = {
 param rgIdentityLocation string
 param identityAddressSpacePrefix string = '10.0.0.0/24'
 param identityVnetPrefix string = '10.0.0.0/25'
-param vmNamePrefix string = 'dc'
 param dcNamePrefix string = '${regionShortCode}-ad-vm'
 param dnsServers array = [
   '168.63.129.16'
@@ -146,13 +142,11 @@ param skuName string = 'VpnGw1AZ'
 
 //Global
 
-//var namingConvention = testing == 'true' ? '${prefix}-${regionShortCode}-${suffix}' : '${prefix}-${regionShortCode}'
 var namingConvention = '${prefix}-${regionShortCode}'
 
 // Keyvault Variables
 var keyVaultRGName = '${namingConvention}-secrets'
 var vaultName = substring('${namingConvention}kv${uniqueString(keyVaultRG.id)}',0,23)
-//var vaultName = testing == 'true' ? substring('${namingConvention}kv${uniqueString(keyVaultRG.id)}',0,22) : substring('${namingConvention}kv${uniqueString(keyVaultRG.id)}',0,23)
 
 // Identity Variables
 var azRegions = [
@@ -187,6 +181,7 @@ var vngName = '${namingConvention}-con-vng'
 var dnsName = substring('${namingConvention}-pip-${uniqueString(connectivityRG.id)}',0, 29)
 var lngName = '${namingConvention}-con-lng'
 var connectivytPipName = substring('${namingConvention}-pip-${uniqueString(connectivityRG.id)}',0, 29)
+var useRemoteGateways = (deploySiteToSite == true ? true : false)
 
 //Create Resource Groups
 resource keyVaultRG 'Microsoft.Resources/resourceGroups@2020-06-01' = if(!dryRun && deployKeyVault){
@@ -306,16 +301,13 @@ module bastionHost './01-adds/adModules/bastion.bicep' = if(!dryRun  && deployId
 }
 
 module nics './01-adds/adModules/nics.bicep' = [for i in range(0, count): {
-  //name: '${vmNamePrefix}-${i + 1}-nic'
   name: '${dcNamePrefix}-${i + 1}-nic'
   scope: identityRG
   params: {
     dryRun: dryRun
     deployIdentity: deployIdentity
-    //vmNamePrefix: vmNamePrefix
     vmNamePrefix: dcNamePrefix
     vnetID: addsVnet.outputs.vnetID
-    //count: count
     i: i
     subnetName: addsVnet.outputs.subnetName
   }
@@ -350,7 +342,6 @@ module vmProperties './01-adds/adModules/vmPropertiesBuilder.bicep' = if(!dryRun
     ntdsSizeGB: ntdsSizeGB
     sysVolSizeGB: sysVolSizeGB
     timeZoneId: timeZoneId
-    //vmNamePrefix: vmNamePrefix
     vmNamePrefix: dcNamePrefix
     vmSize: vmSize
     zones: zones[0]
@@ -370,7 +361,6 @@ module dcConfigurationBuild './01-adds/adModules/configureDCs.bicep' = if(!dryRu
     location: rgIdentityLocation
     newForest: newForest
     psScriptLocation: psScriptLocation
-    //vmNamePrefix: vmNamePrefix
     vmNamePrefix: dcNamePrefix
     zones: zones
     dc1Properties: vmProperties.outputs.vmProperties[0]
@@ -422,7 +412,7 @@ module pip './02-connectivity/p2sModules/pip.bicep' = if(!dryRun && deployConnec
 
 }
 
-module lng './02-connectivity/s2sModules/lng.bicep' = if (deploySiteToSite == true && !dryRun && !deployConnectivity){
+module lng './02-connectivity/s2sModules/lng.bicep' = if (deploySiteToSite == true && !dryRun && deployConnectivity){
   name: 'lng-deploy'
   scope: connectivityRG
   params: {
@@ -435,7 +425,7 @@ module lng './02-connectivity/s2sModules/lng.bicep' = if (deploySiteToSite == tr
   ]
 }
 
-module connection './02-connectivity/s2sModules/connection.bicep' = if (deploySiteToSite == true && !dryRun && !deployConnectivity){
+module connection './02-connectivity/s2sModules/connection.bicep' = if (deploySiteToSite == true && dryRun == false && deployConnectivity == true){
   name: 'deploy-connection'
   scope: connectivityRG
   params: {
@@ -449,7 +439,7 @@ module connection './02-connectivity/s2sModules/connection.bicep' = if (deploySi
   ]
 }
 
-module connectivity2idenityPeering './02-connectivity/peeringModules/connectivity2idenityPeering.bicep' = if(!dryRun && !deployConnectivity) {
+module connectivity2idenityPeering './02-connectivity/peeringModules/connectivity2idenityPeering.bicep' = if(!dryRun && deployConnectivity) {
   name: 'deploy-connectivity2identitypeering'
   scope: connectivityRG
   params: {
@@ -462,13 +452,14 @@ module connectivity2idenityPeering './02-connectivity/peeringModules/connectivit
   ]
 } 
 
-module identity2connectiivtyPeering './02-connectivity/peeringModules/identity2connectivityPeering.bicep' = if(!dryRun && !deployConnectivity) {
+module identity2connectiivtyPeering './02-connectivity/peeringModules/identity2connectivityPeering.bicep' = if(!dryRun && deployConnectivity) {
   name: 'spoke2ConnectivityHubPeering'
   scope: identityRG
   params: {
     connectivityVnetID: connectivityVnet.outputs.vnetID
     connectivityVnetName: connectivityVnetName
     identityVnetName: identityVnetName
+    useRemoteGateways: useRemoteGateways
   }
   dependsOn:[
     vng
