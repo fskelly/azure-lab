@@ -146,4 +146,3 @@ var regionShortCode = {
 }
 
 output regionShortName string = regionShortCode[region].shortCode
-//output instanceCount int = environmentSettings[environmentName].instanceCount
