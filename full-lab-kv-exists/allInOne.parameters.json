@@ -1,0 +1,48 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "subID": {
+      "value": ""
+    },
+    "prefix": {
+      "value": ""
+    },
+    "keyVaultRGLocation": {
+      "value": ""
+    },
+    "objectID": {
+      "value": ""
+    },
+    "tenantID": {
+      "value": ""
+    },
+    "identityRGLocation": {
+      "value": ""
+    },
+    "adminUsername": {
+      "value": ""
+    },
+    "localAdminPassword": {
+      "value": ""
+    },
+    "domainFqdn": {
+      "value": ""
+    },
+    "domainAdminUserName": {
+      "value": ""
+    },
+    "domainAdminPassword": {
+      "value": ""
+    },
+    "connectivityRGLocation": {
+      "value": ""
+    },
+    "gwIP": {
+      "value": ""
+    },
+    "sharedKey": {
+      "value": ""
+    }
+  }
+}
