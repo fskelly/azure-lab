@@ -17,6 +17,7 @@ jobs:
     - name: deploy
       uses: azure/arm-deploy@v1
       with:
+        scope: subscription
         subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
         template: ./full-lab-kv-exists/01-adds/deploy.bicep
         #template: ./azuredeploy.bicep
