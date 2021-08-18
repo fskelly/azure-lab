@@ -18,7 +18,6 @@ jobs:
       uses: azure/arm-deploy@v1
       with:
         subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
-        resourceGroupName: ${{ secrets.AZURE_RG }}
         template: ./full-lab-kv-exists/01-adds/deploy.bicep
         #template: ./azuredeploy.bicep
         parameters: parameters subID=${{ secrets.AZURE_SUBSCRIPTION }} identityRGLocation=northeurope domainFqdn=abc.com prefix=abc localAdminUsername=aureUser domainAdminUserName=azureUser domainAdminPassword=$(adminPassword) localAdminPassword=$(adminPassword)
