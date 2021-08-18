@@ -22,5 +22,5 @@ jobs:
         template: ./full-lab-kv-exists/01-adds/deploy.bicep
         region: northeurope
         #template: ./azuredeploy.bicep
-        parameters: subID=${{ secrets.AZURE_SUBSCRIPTION }} identityRGLocation=northeurope domainFqdn=abc.com prefix=abc localAdminUsername=aureUser domainAdminUserName=azureUser domainAdminPassword=$(adminPassword) localAdminPassword=$(adminPassword)
+        parameters: subID=${{ secrets.AZURE_SUBSCRIPTION }} identityRGLocation=northeurope domainFqdn=abc.com prefix=cba localAdminUsername=aureUser domainAdminUserName=azureUser domainAdminPassword=$(adminPassword) localAdminPassword=$(adminPassword)
         failOnStdErr: false
