@@ -108,7 +108,7 @@ module dcConfigurationBuild './ado/dcs/configureDCs.bicep'= {
     zones: zones
     dc1Properties: vmProperties.outputs.vmProperties[0]
     dc2Properties: vmProperties.outputs.vmProperties[1]
-    managedIdentityName: managedIdentityName
+    //managedIdentityName: managedIdentityName
   }
   
 }

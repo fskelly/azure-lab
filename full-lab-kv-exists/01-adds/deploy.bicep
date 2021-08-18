@@ -13,9 +13,12 @@ param identityRGLocation string
 param localAdminUsername string
 param baseTime string = utcNow('d-M-yyyy-HH-mm-ss')
 
+
+
 //VARAIBLES
 var identityRGName = '${prefix}-identity'
-
+var managedIdentityName = '${prefix}-${idShortCode.outputs.regionShortName}-adds-msi1'
+//var fullManagedIdentityID = '/subscriptions/${subID}/resourceGroups/${identityRGName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/${managedIdentityName}'
 module rg './rg.bicep' = {
   name: 'deploy-rg-${baseTime}' 
   params: {
@@ -62,6 +65,14 @@ module bastionHost './ado/network/bastion.bicep' = {
   dependsOn: [
     networking
   ]
+}
+
+module managedIdentity './ado/mi.bicep' ={
+  name: 'deploy-mi-${baseTime}'
+  scope: resourceGroup(identityRGName)
+  params: {
+    managedIdentityName: managedIdentityName
+  }
 }
 
 module dcs './dcs.bicep'= {
