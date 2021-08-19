@@ -66,8 +66,8 @@ module vmProperties './ado/dcs/vmPropertiesBuilder.bicep' = {
 }
 
 module nics './ado/network/nics.bicep' = [for i in range(0, count): {
+  name: 'ad-${i + 1}-nic'
   //name: 'ad-${i + 1}-nic-${baseTime}'
-  name: 'ad-${i + 1}-nic-${baseTime}'
   params: {
     //vmNamePrefix: dcNamePrefix
     vnetID: addsVnetID
@@ -80,7 +80,8 @@ module nics './ado/network/nics.bicep' = [for i in range(0, count): {
 
 
 module nicsDns './ado/network/nicDns.bicep' = {
-  name: 'set-dns-nic-${baseTime}'
+  //name: 'set-dns-nic-${baseTime}'
+  name: 'set-dns-nic'
   params: {
     dnsServers: dnsServers
     nics: [for i in range(0, count): {
