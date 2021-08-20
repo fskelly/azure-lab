@@ -5,6 +5,8 @@ targetScope = 'subscription'
 //param suffix string
 param subID string
 //param namingConvention string = '${prefix}-${regionShortCode}'
+@maxLength(3)
+@minLength(2)
 param prefix string
 
 // Deployment Params - which components do you want to deploy?
@@ -187,7 +189,7 @@ var dcNamePrefix = '${idShortCode.outputs.regionShortName}-ad-vm'
 var connectivityRGName = '${prefix}-connectivity'
 var connectivityVnetName = '${prefix}-${conShortCode.outputs.regionShortName}-con-vnet'
 var vngName = '${prefix}-${conShortCode.outputs.regionShortName}-con-vng'
-var dnsName = substring('${prefix}-${conShortCode.outputs.regionShortName}-pip-${uniqueString(connectivityRG.id)}',0, 29)
+var dnsName = substring('${prefix}-${conShortCode.outputs.regionShortName}-pip-${uniqueString(connectivityRG.id)}',0, 25)
 var lngName = '${prefix}-${conShortCode.outputs.regionShortName}-con-lng'
 var connectivytPipName = substring('${prefix}-${conShortCode.outputs.regionShortName}-pip-${uniqueString(connectivityRG.id)}',0, 29)
 var useRemoteGateways = (deploySiteToSite == true ? true : false)
