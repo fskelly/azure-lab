@@ -312,7 +312,7 @@ module avSet './01-adds/adModules/avset.bicep' = if(!dryRun  && deployIdentity) 
 }
 
 module bastionPublicIp './01-adds/adModules/pip.bicep' = if(!dryRun  && deployIdentity) {
-  name: 'deploy-pip'
+  name: 'deploy-bastion-pip'
   scope: identityRG
   params: {
     location: identityRGLocation
@@ -439,7 +439,7 @@ module vng './02-connectivity/p2sModules/vng.bicep' = if(!dryRun && deployConnec
 }
 
 module pip './02-connectivity/p2sModules/pip.bicep' = if(!dryRun && deployConnectivity) {
-  name: 'pip-deploy'
+  name: 'pip-connectivity-deploy'
   scope: connectivityRG
   params: {
     pipName: connectivytPipName
