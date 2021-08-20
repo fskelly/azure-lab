@@ -1,0 +1,9 @@
+Supply values for the following parameters:
+prefix: dsa
+adminUsername: azureUser
+localAdminPassword: **************
+domainFqdn: dsa.com
+domainAdminUserName: azureUser
+domainAdminPassword: **************
+gwIP: 1.2.3.4
+sharedKey: **************

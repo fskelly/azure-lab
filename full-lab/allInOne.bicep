@@ -191,7 +191,7 @@ var connectivityVnetName = '${prefix}-${conShortCode.outputs.regionShortName}-co
 var vngName = '${prefix}-${conShortCode.outputs.regionShortName}-con-vng'
 var dnsName = substring('${prefix}-${conShortCode.outputs.regionShortName}-pip-${uniqueString(connectivityRG.id)}',0, 25)
 var lngName = '${prefix}-${conShortCode.outputs.regionShortName}-con-lng'
-var connectivytPipName = substring('${prefix}-${conShortCode.outputs.regionShortName}-pip-${uniqueString(connectivityRG.id)}',0, 29)
+var connectivytPipName = substring('${prefix}-${conShortCode.outputs.regionShortName}-pip-${uniqueString(connectivityRG.id)}',0, 25)
 var useRemoteGateways = (deploySiteToSite == true ? true : false)
 
 //Create Resource Groups
@@ -317,7 +317,6 @@ module bastionPublicIp './01-adds/adModules/pip.bicep' = if(!dryRun  && deployId
   params: {
     location: identityRGLocation
     publicIpAddressName: publicIpAddressName
-
   }
 }
 
@@ -446,10 +445,12 @@ module pip './02-connectivity/p2sModules/pip.bicep' = if(!dryRun && deployConnec
     dnsName: dnsName
     skuName: 'standard'
   }
-
+  dependsOn: [
+    connectivityRG
+  ]
 }
 
-module lng './02-connectivity/s2sModules/lng.bicep' = if (deploySiteToSite == true && !dryRun && deployConnectivity){
+module lng './02-connectivity/s2sModules/lng.bicep' = if (deploySiteToSite && !dryRun && deployConnectivity){
   name: 'lng-deploy'
   scope: connectivityRG
   params: {
@@ -462,7 +463,7 @@ module lng './02-connectivity/s2sModules/lng.bicep' = if (deploySiteToSite == tr
   ]
 }
 
-module connection './02-connectivity/s2sModules/connection.bicep' = if (deploySiteToSite == true && dryRun == false && deployConnectivity == true){
+module connection './02-connectivity/s2sModules/connection.bicep' = if (deploySiteToSite && !dryRun && deployConnectivity){
   name: 'deploy-connection'
   scope: connectivityRG
   params: {
