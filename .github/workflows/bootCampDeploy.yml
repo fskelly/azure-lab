@@ -26,5 +26,5 @@ jobs:
         template: ./full-lab/allInOne.bicep
         region: northeurope
         #template: ./azuredeploy.bicep
-        parameters: subID=${{ secrets.AZURE_SUBSCRIPTION }} connectivityRGLocation=northeurope identityRGLocation=northeurope domainFqdn=fskelly.com. prefix=$prefix adminUsername=aureUser domainAdminUserName=azureUser domainAdminPassword=$(adminPassword) localAdminPassword=$(adminPassword) objectID=4ad6d4e3-4556-4135-979d-bdbd3a63f4ef tenantID=17ca67c9-6ef2-4396-89dd-c8a769cc1991 keyVaultRGLocation=northeurope gwIP=1.2.3.4 sharedKey=$sharedKey
+        parameters: subID=${{ secrets.AZURE_SUBSCRIPTION }} connectivityRGLocation=northeurope identityRGLocation=northeurope domainFqdn=fskelly.com. prefix=${prefix}s adminUsername=aureUser domainAdminUserName=azureUser domainAdminPassword=$(adminPassword) localAdminPassword=$(adminPassword) objectID=4ad6d4e3-4556-4135-979d-bdbd3a63f4ef tenantID=17ca67c9-6ef2-4396-89dd-c8a769cc1991 keyVaultRGLocation=northeurope gwIP=1.2.3.4 sharedKey=$sharedKey
         failOnStdErr: false
