@@ -100,7 +100,7 @@ param identityVnetPrefix string = '10.0.0.0/25'
 param dnsServers array = [
   '168.63.129.16'
 ]
-param count int = 2
+param count int = 1
 param vmSize string = 'Standard_B2ms'
 param ahub bool = false
 param ntdsSizeGB int = 20
@@ -401,7 +401,7 @@ module dcConfigurationBuild './01-adds/adModules/configureDCs.bicep' = if(!dryRu
     vmNamePrefix: dcNamePrefix
     zones: zones
     dc1Properties: vmProperties.outputs.vmProperties[0]
-    dc2Properties: vmProperties.outputs.vmProperties[1]
+    //dc2Properties: vmProperties.outputs.vmProperties[1]
   }
   
 }

@@ -17,7 +17,7 @@ param domainPassword string
 param fullManagedIdentityID string
 param psScriptLocation string
 param dc1Properties object
-param dc2Properties object
+//param dc2Properties object
 
 resource dc1 'Microsoft.Compute/virtualMachines@2020-12-01' = {
   name: '${vmNamePrefix}-1'
@@ -98,7 +98,7 @@ resource rebootDc1 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
     dc1Extension 
   ]    
 }
-
+/* 
 
 resource dc2 'Microsoft.Compute/virtualMachines@2020-12-01' = {
   name: '${vmNamePrefix}-2'
@@ -182,3 +182,4 @@ resource rebootDc2 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
     dc2Extension 
   ]    
 }
+ */
