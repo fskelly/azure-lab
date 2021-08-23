@@ -1,7 +1,7 @@
 on: [push]
-name: Azure ARM
+name: Boot Camp Demo Deploy
 env:
-    prefix: gha
+    prefix: ghb
 
 jobs:
   build-and-deploy:
