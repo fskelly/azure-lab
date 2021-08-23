@@ -7,6 +7,7 @@ param subID string
 //param namingConvention string = '${prefix}-${regionShortCode}'
 @maxLength(3)
 @minLength(2)
+@description('3 letter prefix')
 param prefix string
 
 // Deployment Params - which components do you want to deploy?
