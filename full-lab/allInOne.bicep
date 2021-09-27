@@ -138,6 +138,9 @@ param deploySiteToSite bool = true
 param skuTier string = 'VpnGw1AZ'
 param skuName string = 'VpnGw1AZ'
 
+@secure()
+param adminPasswordOrKey string
+
 // VARIABLES
 
 //Global
@@ -505,16 +508,21 @@ module identity2connectiivtyPeering './02-connectivity/peeringModules/identity2c
   ]
 }
 
-//output spokeVnetID string = spokeVnet.outputs.spokeVnetId
-//output connectivityHubVnetID string = hubVnet.outputs.connectivityHubVnetID
-//output pipName string = connectivytPipName
-//output vngPIP string = pip.outputs.pipIP
-//output sharedKey string = sharedKey
-//output username string = domainUserName
+module linuxVM '03-linuxVms/vm.bicep' = {
+  scope: connectivityRG
+  name: 'linuxvm1'
+  params: {
+    adminPasswordOrKey: adminPasswordOrKey
+    adminUsername: domainAdminPassword
+    existingVirtualNetworkName: connectivityVnetName
+    existingSubnetName: connectivityVnet.outputs.subnetName
+  }
+  dependsOn: [
+    connectivityVnet
+  ]
+}
+
 output logonName string = '${adminUsername}@${domainFqdn}'
 output kvName string = keyvault.outputs.keyVaultName
 output EndVaultName string = vaultName
-//output identityVnetName string = identityVnetName
-//output vnetID string = connectivityVnetName.outputs.vnetID
-//output subnetName string = addsVnet.outputs.subnetName
-//output identityRGName string = identityRG.name
+output vmLogon string = linuxVM.outputs.sshCommand
