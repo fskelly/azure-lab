@@ -23,3 +23,6 @@ Currently this deploys 3 main compomnents
 The individual modules can be found [here](./individualLabModules/)
 
 The full lab [readme is here](./full-lab/readme.md)
+
+![Your Repository's Stats](https://github-readme-stats.vercel.app/api/top-langs/?username=fskelly)  
+![](https://img.shields.io/maintenance/yes/2021?style=plastic)
